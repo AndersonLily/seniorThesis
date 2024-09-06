@@ -28,35 +28,35 @@ This document is a complete description of the software application `Working tit
 &nbsp;
 &nbsp;
 
-|Name| UC-2: Read-Program|
+|Name| UC-2: Insert-Bugs|
 | ----------- | ----------- |
-| Summary | Title |
-| Rational | Text |
-| Users | Text |
-| Preconditons | Text |
-| Basic Events  | Text |
-| Alternative Paths| v |
-| Post Conditions | v | 
+| Summary | The user will slelect that they want to search for additonal bugs in their program and hte prgram will insert bugs.|
+| Rational | This program is designed to add bugs into a files when indicated, but this should only happend when the user indicates.|
+| Users | All users |
+| Preconditons |  A user will have written or load a "runnable" program into VsCode and will have selected the files that they want "bugged".|
+| Basic Events  | <ol><li>A user will select to bug their program.</li><li>The program will continue and insert new bugs into their code.</li></ol> |
+| Alternative Paths| <ol><li>A user will select to bug their program.</li><li>The user will cancel the procedure.</li><li>The program will not insert new bugs into their code.</li></ol>|
+| Post Conditions | The files that the user indicated will have at least 1 new bug across them.| 
 
 &nbsp;
 &nbsp;
 
-|Name| UC-3: Insert-Bugs|
+|Name| UC-3: Select-bug-level|
 | ----------- | ----------- |
-| Summary | Title |
-| Rational | Text |
-| Users | Text |
+| Summary | The user will be able to select the dificulty range of bugs. Bug range will be further defined in documentation here: ` ` |
+| Rational | This tool is made for learning and for fun and will hopefully servive users of many different programming levels if they can select the difficulty of the bugs in a scaular level this can prevent it being to challanging to new programmers or to easy for experienced programmers.|
+| Users | All users|
 | Preconditons | Text |
-| Basic Events  | Text |
-| Alternative Paths| v |
-| Post Conditions | v | 
+| Basic Events  | <ol><li>A user will select to bug their program.</li><li>The program prompt for the difficulty level the user would like.</li><li>The user will select the difficulty </li><li>The program will continue and insert bugs into their code.</li></ol>|
+| Alternative Paths| N/A |
+| Post Conditions | The prgram will have set the limtations on the diffuclty level of the bugs inserted into their program.| 
 
 &nbsp;
 &nbsp;
 
 |Name| UC-4: Remove-Bugs|
 | ----------- | ----------- |
-| Summary | Title |
+| Summary | The program will be able to remove the bugs that it inserted into the program. It will not remove any bugs it did not enter.|
 | Rational | Text |
 | Users | Text |
 | Preconditons | Text |
@@ -67,9 +67,9 @@ This document is a complete description of the software application `Working tit
 &nbsp;
 &nbsp;
 
-|Name| UC-5: VSCode Extention |
+|Name| UC-5: Random-Insertion |
 | ----------- | ----------- |
-| Summary | Title |
+| Summary | User will be able to indicate that they would like  |
 | Rational | Text |
 | Users | Text |
 | Preconditons | Text |
