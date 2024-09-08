@@ -57,7 +57,7 @@ This document is a complete description of the software application `Working tit
 |Name| UC-4: Remove-Bugs|
 | ----------- | ----------- |
 | Summary | The program will be able to remove the bugs that it inserted into the program. It will not remove any bugs it did not enter.|
-| Rational | Text |
+| Rational | Users may decide not to  |
 | Users | Text |
 | Preconditons | Text |
 | Basic Events  | Text |
