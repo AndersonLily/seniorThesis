@@ -1,15 +1,17 @@
 # Software Requirement Specification
 ## Introduction 
 ### Purpose 
-The purpose of this document is to serve as a guide to designers, developers, and testers who are responsible for the engineering of the `Working title` project. It should give the engineers all of the information necessary to design, develop, and test the software.
+The purpose of this document is to serve as a guide to designers, developers, and testers who are responsible for the engineering of the `Spider (Working title)` project. It should give the engineers all of the information necessary to design, develop, and test the software.
 
 ### Scope
-This document contains a complete description of the functionality of the `Working title` project. It consists of use cases, functional requirements, and non-functional requirements,
+This document contains a complete description of the functionality of the `Spider (Working title)` project. It consists of use cases, functional requirements, and non-functional requirements,
 which, taken together, form a complete description of the software.
 
 ### System Overview 
-This document is a complete description of the software application `Working title`. All relevant requirement information regarding the project is included in this document. `Working title` is intended for real-world programming students to train them how to identify common areas for bugs and what they look like. This application will be a VsCode extention able to add bugs into a runnable program that will either stop the program from able to be compile or allow compliation but have bugs considered "bad practice".
+This document is a complete description of the software application `SPider (Working title)`. All relevant requirement information regarding the project is included in this document. `Spider (Working title)` is intended for real-world programming students to train them how to identify common areas for bugs and what they look like. This application will be a VsCode extention able to add bugs into a runnable program that will either stop the program from able to be compile or allow compliation but have bugs considered "bad practice".
 
+### Why call it Spider?
+Well, The aim of this program is to help teach programmers how to effectively catch bugs!
 ### Definitions 
 
 
@@ -57,25 +59,25 @@ This document is a complete description of the software application `Working tit
 |Name| UC-4: Remove-Bugs|
 | ----------- | ----------- |
 | Summary | The program will be able to remove the bugs that it inserted into the program. It will not remove any bugs it did not enter.|
-| Rational | Users may decide not to  |
-| Users | Text |
-| Preconditons | Text |
-| Basic Events  | Text |
-| Alternative Paths| v |
-| Post Conditions | v |
+| Rational | Users may decide they want the bugs added by this program to be removed without having to find them themselves. |
+| Users | All users |
+| Preconditons | The file the user has indicated must have had bugs added. |
+| Basic Events  | <ol><li>A user will select to remove the bug(s) the program put into the users program.</li><li>The program prompt will remove the bugs it added (not removing any bugs that the user themselves has entered).</li></ol> |
+| Alternative Paths| N/A |
+| Post Conditions | The program will be all code that the user themselves have written  |
 
 &nbsp;
 &nbsp;
 
-|Name| UC-5: Random-Insertion |
+|Name| UC-5: Bug-Reveal |
 | ----------- | ----------- |
-| Summary | User will be able to indicate that they would like  |
-| Rational | Text |
-| Users | Text |
-| Preconditons | Text |
-| Basic Events  | Text |
-| Alternative Paths| v |
-| Post Conditions | v | 
+| Summary | The program will be able to reveal the bugs that it inserted into the users code |
+| Rational | For users who want to know what bugs they haven't or seen thye may wish to visually see where the bug is so they can investigate. This will not reveal any bugs that the user themselves wrote.|
+| Users | All users |
+| Preconditons | User has bugged their program. |
+| Basic Events  | <ol><li>A user will select to reveal inserted bugs their program.</li><li>The program prompt the user if they want the bugs revealed .</li><li>The user will select yes </li><li>The program will visually indicate where the bugs in the code are.</li></ol> |
+| Alternative Paths| <ol><li>A user will select to reveal inserted bugs their program.</li><li>The program prompt the user if they want the bugs revealed .</li><li>The user will select no </li><li>The program will not show where the bugs in the code are.</li></ol> |
+| Post Conditions | The file the user is looking at will have it's inserted bugs revealed.| 
 
 
 
