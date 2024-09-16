@@ -14,7 +14,7 @@ This link is VS Codes offical website and expliations of how to use their API.
 This link is a step-by-step guide by DEV about how to create a VS code extention, it seemes to primaraly focus on how ot implement it in C#
 
 ### Language specific
-Currently the language is undecided so there are no resoruces yet :)
+**[Typescript](https://www.typescriptlang.org/)** Typescritps offical website and descritons plus some introductory courses.
 
 ### Miscellaneous
 **[Markdown cheatsheet](https://www.markdownguide.org/cheat-sheet/)** This is a markdown guide.
