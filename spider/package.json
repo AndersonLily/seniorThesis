@@ -17,7 +17,28 @@
         "command": "spider.helloWorld",
         "title": "Hello World"
       }
+    ],
+
+    "viewsContainers": {
+    "activitybar": [
+      {
+        "id": "snake-test",
+        "title": "Snake test",
+        "icon": "media/snake.svg"
+      }
     ]
+  },
+
+  "views": {
+    "snake-test": [
+      {
+        "id": "spider.helloWorld",
+        "name": "Hello World",
+        "icon": "media/snake.svg",
+        "contextualTitle": "Snake test"
+      }
+    ]
+  }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
