@@ -9,13 +9,21 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./extension.js",
   "contributes": {
-    "commands": [{
-      "command": "spider.helloWorld",
-      "title": "Hello World"
-    }]
+    "commands": [
+      {
+        "command": "spider.helloWorld",
+        "title": "Hello World"
+      },
+      {
+        "command": "spider.startup",
+        "title": "Start up Spider"
+      }
+  ]
   },
   "scripts": {
     "lint": "eslint .",

@@ -9,29 +9,34 @@ const vscode = require('vscode');
  * @param {vscode.ExtensionContext} context
  */
 
-let storytellerStatusBarItem = null;
+let spiderFileSelectStatusBarItem = null;
 
-
+/* Since in the package.json has the activationEvents that contains
+ * "onStartUpFinished" this function will run then, that is why all of the
+ * commands included are registered here as well as calling the startup_command.
+ */
 function activate(context) {
-	
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "spider" is now active!');
-	updateStorytellerStatusBar('Whoops', 'THIS is a tool tip i think its just something that shows when you hover', 'spider.helloWorld');
+    context.subscriptions.push(vscode.commands.registerCommand('spider.startup', startup_command));
+	context.subscriptions.push(vscode.commands.registerCommand('spider.helloWorld', hello_world_command));
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('spider.helloWorld', function () {
-		// The code you place here will be executed every time your command is executed
+    vscode.commands.executeCommand('spider.startup');
+
+    //context.subscriptions.push(updateStorytellerStatusBar('Whoops', 'THIS is a tool tip i think its just something that shows when you hover', 'spider.helloWorld'));
+}
+
+function startup_command(){
+    console.log('This is inside statup');
+    updateStorytellerStatusBar('any', 'tip for it', 'spider.helloWorld');
+   // vscode.commands.executeCommand('spider.helloWorld')
+}
+
+function hello_world_command(){
+    // The code you place here will be executed every time your command is executed
 
 		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello World from Spider!');
-
-	});
-
-	context.subscriptions.push(disposable);
 }
 
 
@@ -108,18 +113,18 @@ function handleTextEditorChange(event) {
 
 function updateStorytellerStatusBar(text, tooltip, command) {
     //if the status bar has not been created yet
-    if(storytellerStatusBarItem === null) {
+    if(spiderFileSelectStatusBarItem === null) {
         //add a storyteller item to the status bar
-        storytellerStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 10);    
-        storytellerStatusBarItem.text = text;
-        storytellerStatusBarItem.tooltip = tooltip;
-        storytellerStatusBarItem.command = command;
-        storytellerStatusBarItem.show();
+        spiderFileSelectStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 10);    
+        spiderFileSelectStatusBarItem.text = text;
+        spiderFileSelectStatusBarItem.tooltip = tooltip;
+        spiderFileSelectStatusBarItem.command = command;
+        spiderFileSelectStatusBarItem.show();
     } else { //the status bar has been created
         //update the existing status bar
-        storytellerStatusBarItem.text = text;
-        storytellerStatusBarItem.tooltip = tooltip;
-        storytellerStatusBarItem.command = command;
+        spiderFileSelectStatusBarItem.text = text;
+        spiderFileSelectStatusBarItem.tooltip = tooltip;
+        spiderFileSelectStatusBarItem.command = command;
     }
 }
 
