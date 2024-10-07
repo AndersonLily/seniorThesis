@@ -4,11 +4,12 @@ const vscode = require('vscode');
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-
 /**
  * @param {vscode.ExtensionContext} context
  */
 
+
+let filesToModify = [];
 let spiderFileSelectStatusBarItem = null;
 
 /* Since in the package.json has the activationEvents that contains
@@ -19,17 +20,33 @@ function activate(context) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
     context.subscriptions.push(vscode.commands.registerCommand('spider.startup', startup_command));
+    context.subscriptions.push(vscode.commands.registerCommand('spider.collectFiles', collectFiles_command));
 	context.subscriptions.push(vscode.commands.registerCommand('spider.helloWorld', hello_world_command));
 
     vscode.commands.executeCommand('spider.startup');
-
-    //context.subscriptions.push(updateStorytellerStatusBar('Whoops', 'THIS is a tool tip i think its just something that shows when you hover', 'spider.helloWorld'));
 }
 
 function startup_command(){
-    console.log('This is inside statup');
-    updateStorytellerStatusBar('any', 'tip for it', 'spider.helloWorld');
-   // vscode.commands.executeCommand('spider.helloWorld')
+    console.log('startup_command');
+    // TO DO: add icon to this from the vscode style guidelines either this is a bug to "bug" for a file to show the collection needs to happen
+    updateSpiderStatusBar('Spider Start', 'Select files that you want to search for bugs in', 'spider.collectFiles');
+}
+
+function collectFiles_command(){
+    console.log('collectFiles_command');
+
+    let options = vscode.OpenDialogOptions ={
+       canSelectFiles: true,
+        canSelectFolders: true
+    }
+    vscode.window.showOpenDialog(options).then(value => {
+        if (value == undefined){
+            console.log("Inside console log");
+        }else{
+            console.log(value[0]);
+        }
+        
+    });
 }
 
 function hello_world_command(){
@@ -111,10 +128,10 @@ function handleTextEditorChange(event) {
 }
 	*/
 
-function updateStorytellerStatusBar(text, tooltip, command) {
+function updateSpiderStatusBar(text, tooltip, command) {
     //if the status bar has not been created yet
     if(spiderFileSelectStatusBarItem === null) {
-        //add a storyteller item to the status bar
+        //add a item to the status bar
         spiderFileSelectStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 10);    
         spiderFileSelectStatusBarItem.text = text;
         spiderFileSelectStatusBarItem.tooltip = tooltip;

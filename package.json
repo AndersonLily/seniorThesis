@@ -17,11 +17,18 @@
     "commands": [
       {
         "command": "spider.helloWorld",
-        "title": "Hello World"
+        "title": "Hello World",
+        "category": "Spider"
       },
       {
         "command": "spider.startup",
-        "title": "Start up Spider"
+        "title": "Start up Spider",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.collectFiles",
+        "title": "Collect Files",
+        "category": "Spider"
       }
   ]
   },
