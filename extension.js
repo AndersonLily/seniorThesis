@@ -37,7 +37,7 @@ function collectFiles_command(){
 
     let options = vscode.OpenDialogOptions ={
        canSelectFiles: true,
-        canSelectFolders: true
+       canSelectFolders: true
     }
     vscode.window.showOpenDialog(options).then(value => {
         if (value == undefined){
