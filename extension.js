@@ -23,7 +23,8 @@ function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand('spider.collectFiles', collectFiles_command));
 	context.subscriptions.push(vscode.commands.registerCommand('spider.helloWorld', hello_world_command));
 
-    vscode.commands.executeCommand('spider.startup');
+    
+   vscode.commands.executeCommand('spider.startup');
 }
 
 function startup_command(){
@@ -35,25 +36,35 @@ function startup_command(){
 function collectFiles_command(){
     console.log('collectFiles_command');
 
+    // According to the vscode api on linux and windows a open dialog cannot
+    // be both file selector and folder selecter, since I am prompting the user for
+    // a file only that can select is set to true.
     let options = vscode.OpenDialogOptions ={
-       canSelectFiles: true,
-       canSelectFolders: true
+       canSelectFiles: true
     }
     vscode.window.showOpenDialog(options).then(value => {
         if (value == undefined){
             console.log("Inside console log");
+            // Have a "THROW" for this issue 
         }else{
-            console.log(value[0]);
+            filesToModify.push(value.at(0).fsPath);
         }
-        
     });
 }
 
+// THIS is also being used a the test function for writing code that is ued for debugging but I ma not sure if it 
+// Will esixt in the final product.
 function hello_world_command(){
     // The code you place here will be executed every time your command is executed
 
 		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello World from Spider!');
+
+        //Lets change the file pather into a uri and than use the command vscode.open
+        // to display al the files 
+        for (let i = 0; i < filesToModify.length; i++) {
+           console.log(filesToModify[i]);
+          }    
 }
 
 
