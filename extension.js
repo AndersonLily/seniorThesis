@@ -47,7 +47,7 @@ function collectFiles_command(){
             console.log("Inside console log");
             // Have a "THROW" for this issue 
         }else{
-            filesToModify.push(value.at(0).fsPath);
+            filesToModify.push(value.at(0));
         }
     });
 }
@@ -64,81 +64,21 @@ function hello_world_command(){
         // to display al the files 
         for (let i = 0; i < filesToModify.length; i++) {
            console.log(filesToModify[i]);
+           vscode.commands.executeCommand('vscode.open', filesToModify[i]);
+
+           console.log(i);
+           console.log("opened it");
+           //figure out how to navagate to the next window so all can be opened simultainouly :)
           }    
 }
 
-
 /*
-function handleTextEditorChange(event) {
-    if(isStorytellerCurrentlyActive) {
-        //path to the file that is being edited
-        const filePath = event.document.fileName;
-
-        //if the file being edited is in the tracked st project
-        if(filePath.startsWith(vscode.workspace.workspaceFolders[0].uri.fsPath) === true) {
-            //go through each of the changes in this change event (there can 
-            //be more than one if there are multiple cursors)
-            for(let i = 0;i < event.contentChanges.length;i++) {
-                //get the change object
-                const change = event.contentChanges[i];
-    
-                //if no text has been added, then this is a delete
-                if(change.text.length === 0) {
-                    //get some data about the delete
-                    const numCharactersDeleted = change.rangeLength;
-                    const deleteTextStartLine = change.range.start.line;
-                    const deleteTextStartColumn = change.range.start.character;
-        
-                    //record the deletion of text
-                    projectManager.handleDeletedText(filePath, deleteTextStartLine, deleteTextStartColumn, numCharactersDeleted);
-                } else { //new text has been added in this change, this is an insert
-                    //if there was some text that was selected and replaced 
-                    //(deleted and then added)
-                    if(change.rangeLength > 0) {
-                        //get some data about the delete
-                        const numCharactersDeleted = change.rangeLength;
-                        const deleteTextStartLine = change.range.start.line;
-                        const deleteTextStartColumn = change.range.start.character;
-
-                        //first delete the selected code (insert of new text to follow)
-                        projectManager.handleDeletedText(filePath, deleteTextStartLine, deleteTextStartColumn, numCharactersDeleted);
-                    } 
-        
-                    //get some data about the insert
-                    const newText = change.text;
-                    const newTextStartLine = change.range.start.line;
-                    const newTextStartColumn = change.range.start.character;
-        
-                    //a set of all the event ids from a copy/cut
-                    let pastedInsertEventIds = [];
-
-                    //if this was a paste
-                    if(clipboardData.activePaste) { 
-                        //if the new text is exactly the same as what was on our clipboard
-                        if(newText === clipboardData.text) {
-                            //store the pasted event ids
-                            pastedInsertEventIds = clipboardData.eventIds;
-                        } else { //this is a paste but it doesn't match the last storyteller copy/cut (pasted from another source)
-                            //create an array of strings with 'other' for the paste event ids to signify a paste from outside the editor
-                            pastedInsertEventIds = newText.split('').map(() => 'other');
-
-                            //clear out any old data
-                            clipboardData.text = '';
-                            clipboardData.eventIds = [];
-                        }
-
-                        //we handled the most current paste, set this back to false
-                        clipboardData.activePaste = false;
-                    }
-                    //record the insertion of new text
-                    projectManager.handleInsertedText(filePath, newText, newTextStartLine, newTextStartColumn, pastedInsertEventIds);
-                }
-            }
-        }
-    }
-}
-	*/
-
+What I think I might do is create a copy of of all the files that are collected and put a copy of them
+all into the smae folder that this extention runs and will delete if asked, that way the original files are never changed
+but all their code is accessable to have, and then there could be a command called copy the bugged file over that copies it to 
+the users file only if htey want to. This means that all of hte files can be put in the same file and displayed in the file tree 
+at the same time which would be ideal.
+*/
 function updateSpiderStatusBar(text, tooltip, command) {
     //if the status bar has not been created yet
     if(spiderFileSelectStatusBarItem === null) {
