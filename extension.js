@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
+const fs = require('fs').promises;
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -10,6 +11,7 @@ const vscode = require('vscode');
 
 
 let filesToModify = [];
+let files_to_bug = null;
 let spiderFileSelectStatusBarItem = null;
 
 /* Since in the package.json has the activationEvents that contains
@@ -50,6 +52,48 @@ function collectFiles_command(){
             filesToModify.push(value.at(0));
         }
     });
+
+   // console.log((get_new_folder_name()))
+   // console.log(vscode.workspace.workspaceFolders[0].uri.fsPath)
+    
+}
+
+// NEED TO ADD A CASE FOR IF TTHERE IS NO OPEN WORKSPACE FOLDER :)
+function get_new_folder_name(){
+
+// Have this folder title be Spider (date genrated) files inside
+// get the path to the current direcory and generate the name :)
+
+const today = new Date();
+const yyyy = today.getFullYear();
+const mm = today.getMonth() + 1; 
+const  dd = today.getDate();
+
+const formattedToday = dd + '-' + mm + '-' + yyyy;
+
+return vscode.workspace.workspaceFolders[0].uri.fsPath + "\\" + "Spider-" + formattedToday;
+}
+
+async function create_folder(dirPath) {
+    try {
+        await fs.mkdir(dirPath, { recursive: true });
+
+        for(let count_of_files = 0; count_of_files < filesToModify.length; count_of_files++){
+           // By using COPYFILE_EXCL, the operation will fail if destination.txt exists.
+            try {
+                const file_name = (filesToModify[count_of_files].fsPath).split('\\').pop().split('/').pop();
+                let individual_Path = dirPath + "\\" + file_name;
+            
+               await fs.copyFile(filesToModify[count_of_files].fsPath, individual_Path);
+                console.log('source.txt was copied to destination.txt');
+            }catch {
+                console.error('The file could not be copied');
+            }
+        } 
+        console.log('Directory created');
+    } catch (err) {
+        console.error('An error occurred:', err);
+    }
 }
 
 // THIS is also being used a the test function for writing code that is ued for debugging but I ma not sure if it 
@@ -58,7 +102,7 @@ function hello_world_command(){
     // The code you place here will be executed every time your command is executed
 
 		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from Spider!');
+		/*vscode.window.showInformationMessage('Hello World from Spider!');
 
         //Lets change the file pather into a uri and than use the command vscode.open
         // to display al the files 
@@ -69,7 +113,9 @@ function hello_world_command(){
            console.log(i);
            console.log("opened it");
            //figure out how to navagate to the next window so all can be opened simultainouly :)
-          }    
+          }  
+          */
+          create_folder((get_new_folder_name()))
 }
 
 /*
