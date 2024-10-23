@@ -11,7 +11,7 @@ const fs = require('fs').promises;
 
 
 let filesToModify = [];
-let files_to_bug = null;
+let files_to_current_directory = null;
 let spiderFileSelectStatusBarItem = null;
 
 /* Since in the package.json has the activationEvents that contains
@@ -24,6 +24,10 @@ function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand('spider.startup', startup_command));
     context.subscriptions.push(vscode.commands.registerCommand('spider.collectFiles', collectFiles_command));
 	context.subscriptions.push(vscode.commands.registerCommand('spider.helloWorld', hello_world_command));
+    context.subscriptions.push(vscode.commands.registerCommand('spider.createDirectory', create_folder));
+   // context.subscriptions.push(vscode.commands.registerCommand('spider.openDirectory', // function :)));
+   // context.subscriptions.push(vscode.commands.registerCommand('spider.createDirectory', // function :)));
+  //  context.subscriptions.push(vscode.commands.registerCommand('spider.createDirectory', // function :)));
 
     
    vscode.commands.executeCommand('spider.startup');
@@ -52,13 +56,10 @@ function collectFiles_command(){
             filesToModify.push(value.at(0));
         }
     });
-
-   // console.log((get_new_folder_name()))
-   // console.log(vscode.workspace.workspaceFolders[0].uri.fsPath)
-    
+  
 }
 
-// NEED TO ADD A CASE FOR IF TTHERE IS NO OPEN WORKSPACE FOLDER :)
+//If this is called then the current directory will be set to what is generated.
 function get_new_folder_name(){
 
 // Have this folder title be Spider (date genrated) files inside
@@ -71,10 +72,13 @@ const  dd = today.getDate();
 
 const formattedToday = dd + '-' + mm + '-' + yyyy;
 
-return vscode.workspace.workspaceFolders[0].uri.fsPath + "\\" + "Spider-" + formattedToday;
+files_to_current_directory = vscode.workspace.workspaceFolders[0].uri.fsPath + "\\" + "Spider-" + formattedToday;
 }
 
+
 async function create_folder(dirPath) {
+
+    if (dirPath != null){
     try {
         await fs.mkdir(dirPath, { recursive: true });
 
@@ -93,29 +97,36 @@ async function create_folder(dirPath) {
         console.log('Directory created');
     } catch (err) {
         console.error('An error occurred:', err);
+    }}
+    else {
+        console.log('ERROR: Tried to create a folder with a null path')
     }
 }
 
-// THIS is also being used a the test function for writing code that is ued for debugging but I ma not sure if it 
+// This is also being used a the test function for writing code that is ued for debugging but I ma not sure if it 
 // Will esixt in the final product.
 function hello_world_command(){
     // The code you place here will be executed every time your command is executed
 
-		// Display a message box to the user
-		/*vscode.window.showInformationMessage('Hello World from Spider!');
+         //get_new_folder_name()
+        //  create_folder(files_to_current_directory)
 
-        //Lets change the file pather into a uri and than use the command vscode.open
-        // to display al the files 
-        for (let i = 0; i < filesToModify.length; i++) {
-           console.log(filesToModify[i]);
-           vscode.commands.executeCommand('vscode.open', filesToModify[i]);
+        user_choice = new MessageEvent;
 
-           console.log(i);
-           console.log("opened it");
-           //figure out how to navagate to the next window so all can be opened simultainouly :)
-          }  
-          */
-          create_folder((get_new_folder_name()))
+        let GoToHelp = 'Go to Help';
+        let noHelp = 'noHelp'
+            vscode.window.showInformationMessage('Click for more Info', GoToHelp, noHelp).then(selection => {
+                     if (selection === GoToHelp) {
+                        vscode.env.openExternal(vscode.Uri.parse('https://www.merriam-webster.com/dictionary/hep'));
+                     }
+                     else if (selection === noHelp){
+                        console.log("no help today at all")
+                     }
+                 });
+          //vscode.window.showInformationMessage('Hello VS code!', true);
+
+          //vscode.window.showInputBox();
+         // vscode.window.showQuickPick("Create new directory", "Open existing directory", "More information about Spider");
 }
 
 /*

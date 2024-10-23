@@ -29,6 +29,26 @@
         "command": "spider.collectFiles",
         "title": "Collect Files",
         "category": "Spider"
+      },
+      {
+        "command": "spider.createDirectory",
+        "title": "Create New Directory",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.openPreviousDirectory",
+        "title": "Open Existing Directory",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.deleteDirectory",
+        "title": "Delete Directory",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.ReadandBugFiles",
+        "title": "Bug",
+        "category": "Spider"
       }
   ]
   },

@@ -19,4 +19,7 @@ These are bugs that are very common problems that are to do with how the languag
 
 ### Functional errors
 These are bugs that will either prevent the program from running, an error in logic, will prevent the project from it's intended use, or very inefficent.
->Examples: Memory leaks, redefinions od varaibles, erasing varaible declarations, buffer overflows, unused variables, Altering or creating loops to be infinite, messing with if statments, or making blocks impossilbe to enter.
+
+
+// paramaters/ ordering of perameters 
+>Examples: Memory leaks, redefinions of varaibles, erasing varaible declarations, buffer overflows, unused variables, Altering or creating loops to be infinite, messing with if statments, or making blocks impossilbe to enter.
