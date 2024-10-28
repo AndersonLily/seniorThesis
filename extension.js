@@ -1,7 +1,9 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
-const fs = require('fs').promises;
+const fs = require('fs');
+const fs2 = require('fs').promises;
+
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -11,8 +13,9 @@ const fs = require('fs').promises;
 
 
 let filesToModify = [];
-let files_to_current_directory = null;
+let current_directory = null;
 let spiderFileSelectStatusBarItem = null;
+let secondFileStatusBarItem = null;
 
 /* Since in the package.json has the activationEvents that contains
  * "onStartUpFinished" this function will run then, that is why all of the
@@ -24,9 +27,9 @@ function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand('spider.startup', startup_command));
     context.subscriptions.push(vscode.commands.registerCommand('spider.collectFiles', collectFiles_command));
 	context.subscriptions.push(vscode.commands.registerCommand('spider.helloWorld', hello_world_command));
-    context.subscriptions.push(vscode.commands.registerCommand('spider.createDirectory', create_folder));
-   // context.subscriptions.push(vscode.commands.registerCommand('spider.openDirectory', // function :)));
-   // context.subscriptions.push(vscode.commands.registerCommand('spider.createDirectory', // function :)));
+    context.subscriptions.push(vscode.commands.registerCommand('spider.createDirectory', create_directory_command));
+    context.subscriptions.push(vscode.commands.registerCommand('spider.openPreviousDirectory', open_previous_directory_command));
+    context.subscriptions.push(vscode.commands.registerCommand('spider.ReadandBugFiles', bug_files_command));
   //  context.subscriptions.push(vscode.commands.registerCommand('spider.createDirectory', // function :)));
 
     
@@ -35,13 +38,23 @@ function activate(context) {
 
 function startup_command(){
     console.log('startup_command');
-    // TO DO: add icon to this from the vscode style guidelines either this is a bug to "bug" for a file to show the collection needs to happen
-    updateSpiderStatusBar('Spider Start', 'Select files that you want to search for bugs in', 'spider.collectFiles');
+
+    let new_directory = 'Create a new Spider directory'
+    let old_directory = 'Open a old Spider directory'
+
+    vscode.window.showInformationMessage('What do you want to do today?', new_directory, old_directory).then(selection => {
+        if (selection === new_directory) {
+            // TO DO: add icon to this from the vscode style guidelines either this is a bug to "bug" for a file to show the collection needs to happen
+                    updateSpiderStatusBar('Spider - Add files', 'Select files that you want to search for bugs in', 'spider.collectFiles');
+            }
+        else if (selection === old_directory){
+            updateSpiderStatusBar('Spider - Open Directory', 'Select the directory that contains the files you want to search for bugs in', 'spider.openPreviousDirectory');
+         }
+        });
 }
 
 function collectFiles_command(){
     console.log('collectFiles_command');
-
     // According to the vscode api on linux and windows a open dialog cannot
     // be both file selector and folder selecter, since I am prompting the user for
     // a file only that can select is set to true.
@@ -53,7 +66,16 @@ function collectFiles_command(){
             console.log("Inside console log");
             // Have a "THROW" for this issue 
         }else{
-            filesToModify.push(value.at(0));
+            //filtering out anything that isn't a .h .cpp or .c
+            let startOfType = (value.at(0).path).lastIndexOf('.')
+            let fileType = value.at(0).path.slice(startOfType, value.at(0).path.length)
+
+            if(fileType === ".c" || fileType === ".cpp" || fileType === ".h"){
+            console.log(fileType)
+            filesToModify.push(value.at(0))
+            get_new_folder_name()
+            updateSecondStatusBar('Create directory now', 'When you have collected all the files you want to bug select this button to collect them into the same directory', 'spider.createDirectory', true);
+            }
         }
     });
   
@@ -61,7 +83,6 @@ function collectFiles_command(){
 
 //If this is called then the current directory will be set to what is generated.
 function get_new_folder_name(){
-
 // Have this folder title be Spider (date genrated) files inside
 // get the path to the current direcory and generate the name :)
 
@@ -72,15 +93,24 @@ const  dd = today.getDate();
 
 const formattedToday = dd + '-' + mm + '-' + yyyy;
 
-files_to_current_directory = vscode.workspace.workspaceFolders[0].uri.fsPath + "\\" + "Spider-" + formattedToday;
+// TODO: the fs.path needs to be altered to not have double slashes :)
+current_directory = vscode.workspace.workspaceFolders[0].uri.fsPath + "/" + "Spider-" + formattedToday;
 }
 
 
-async function create_folder(dirPath) {
+async function create_directory_command() {
+
+    dirPath = current_directory
+
+    let extra_slash = (current_directory).indexOf('C:')
+
+    if(extra_slash != 0 && extra_slash != -1){
+        current_directory = current_directory.slice(extra_slash, current_directory.length)
+    }
 
     if (dirPath != null){
     try {
-        await fs.mkdir(dirPath, { recursive: true });
+        await fs2.mkdir(dirPath, {recursive: true });
 
         for(let count_of_files = 0; count_of_files < filesToModify.length; count_of_files++){
            // By using COPYFILE_EXCL, the operation will fail if destination.txt exists.
@@ -88,12 +118,14 @@ async function create_folder(dirPath) {
                 const file_name = (filesToModify[count_of_files].fsPath).split('\\').pop().split('/').pop();
                 let individual_Path = dirPath + "\\" + file_name;
             
-               await fs.copyFile(filesToModify[count_of_files].fsPath, individual_Path);
+                await fs2.copyFile(filesToModify[count_of_files].fsPath, individual_Path);
                 console.log('source.txt was copied to destination.txt');
+                updateSecondStatusBar('Create directory now', 'When you have collected all the files you want to bug select this button to collect them into the same directory', 'spider.createDirectory', false);
             }catch {
                 console.error('The file could not be copied');
             }
         } 
+
         console.log('Directory created');
     } catch (err) {
         console.error('An error occurred:', err);
@@ -103,26 +135,85 @@ async function create_folder(dirPath) {
     }
 }
 
+function open_previous_directory_command(){
+    let options = vscode.OpenDialogOptions = {
+        canSelectFolders: true
+    }
+
+     vscode.window.showOpenDialog(options).then(value => {
+         if (value == undefined){
+             console.log("Inside console log");
+             // Have a "THROW" for this issue 
+         }else{
+             //filtering out anything that isn't a .h .cpp or .c
+             
+             let findSpider = (value.at(0).path).indexOf('Spider-')
+             //let specificSpiderDi = value.at(0).path.slice(startOfType, value.at(0).path.length)
+
+             if(findSpider != -1){
+                current_directory = value.at(0).path
+                let extra_slash = (current_directory).indexOf('C:')
+
+                if(extra_slash != 0 && extra_slash != -1){
+                    current_directory = current_directory.slice(extra_slash, current_directory.length)
+                }
+             }
+         }
+     });
+}
+
+ function get_files_from_spider_directory(dir){
+
+    for(let remove_counter = filesToModify.length ; remove_counter >= 0; remove_counter--){
+        filesToModify.pop();
+        console.log("removed the last thing in filestomodify")
+    }
+
+    let newFile;
+    console.log("In get files");
+    //try {
+        const files = fs.readdirSync(dir);
+        for (const file of files){
+          newFile = dir + "/" + file
+          console.log(" here %s",typeof newFile);
+          filesToModify.push(newFile.toString());
+        }
+}
+
+function bug_files_command(){
+
+    get_files_from_spider_directory(current_directory);
+    console.log("here");
+    console.log(filesToModify);
+
+// Learned this here https://youtu.be/yQBw8skBdZU?si=bh5_ADuWAWO99xOI
+    for(let i = 0; i < filesToModify.length ; i++){
+        console.log("tring to read a file");
+        console.log(typeof filesToModify.at(i))
+        fs.readFile(filesToModify.at(i), (err,data)=>{
+            if(err) throw err;
+            console.log(data.toString());
+         })
+    }
+
+    
+    
+    // for(let count_of_files = 0; count_of_files < filesToModify.length; count_of_files++){
+    //     console.log("The file to modify is " + filesToModify.at(i));
+    // }
+
+}
+
+
 // This is also being used a the test function for writing code that is ued for debugging but I ma not sure if it 
 // Will esixt in the final product.
 function hello_world_command(){
     // The code you place here will be executed every time your command is executed
 
          //get_new_folder_name()
-        //  create_folder(files_to_current_directory)
+        //  create_folder(current_directory)
 
-        user_choice = new MessageEvent;
-
-        let GoToHelp = 'Go to Help';
-        let noHelp = 'noHelp'
-            vscode.window.showInformationMessage('Click for more Info', GoToHelp, noHelp).then(selection => {
-                     if (selection === GoToHelp) {
-                        vscode.env.openExternal(vscode.Uri.parse('https://www.merriam-webster.com/dictionary/hep'));
-                     }
-                     else if (selection === noHelp){
-                        console.log("no help today at all")
-                     }
-                 });
+      
           //vscode.window.showInformationMessage('Hello VS code!', true);
 
           //vscode.window.showInputBox();
@@ -150,6 +241,29 @@ function updateSpiderStatusBar(text, tooltip, command) {
         spiderFileSelectStatusBarItem.text = text;
         spiderFileSelectStatusBarItem.tooltip = tooltip;
         spiderFileSelectStatusBarItem.command = command;
+    }
+}
+
+function updateSecondStatusBar(text, tooltip, command, show) {
+    //if the status bar has not been created yet
+    if (show === true){
+        if(secondFileStatusBarItem === null) {
+        //add a item to the status bar
+        secondFileStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 10);    
+        secondFileStatusBarItem.text = text;
+        secondFileStatusBarItem.tooltip = tooltip;
+        secondFileStatusBarItem.command = command;
+        secondFileStatusBarItem.show();
+    } else { //the status bar has been created
+        //update the existing status bar
+        secondFileStatusBarItem.text = text;
+        secondFileStatusBarItem.tooltip = tooltip;
+        secondFileStatusBarItem.command = command;
+    }
+    }else{
+        if(secondFileStatusBarItem != null) {
+        secondFileStatusBarItem.hide();
+        } 
     }
 }
 
