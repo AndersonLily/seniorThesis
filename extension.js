@@ -64,7 +64,7 @@ function collectFiles_command(){
     vscode.window.showOpenDialog(options).then(value => {
         if (value == undefined){
             console.log("Inside console log");
-            // Have a "THROW" for this issue 
+            // Have a "THROW" for this issue Maybe?
         }else{
             //filtering out anything that isn't a .h .cpp or .c
             let startOfType = (value.at(0).path).lastIndexOf('.')
@@ -175,9 +175,75 @@ function open_previous_directory_command(){
         const files = fs.readdirSync(dir);
         for (const file of files){
           newFile = dir + "/" + file
-          console.log(" here %s",typeof newFile);
+         // console.log(" here %s",typeof newFile);
           filesToModify.push(newFile.toString());
         }
+}
+
+function getCodeLength(data_string){
+/*
+*/
+//
+    let codeCounter = 0;
+    let inSingleComment = false;
+    let inMultiComment = false;
+    let possibleToBeinComment = true;
+    for(let i = 0; i < data_string.length; i++){
+        if(possibleToBeinComment){
+            if(i != 0 && data_string.at(i) === '/' && data_string.at(i-1) === '/' && !inMultiComment){
+                inSingleComment = true;
+            }
+            else if(i != 0 && data_string.at(i) === '*' && data_string.at(i-1) === '/' && !inSingleComment){
+                inMultiComment = true;
+            }
+            else if(i != 0 && data_string.at(i) === '/' && data_string.at(i-1) === '*' && inMultiComment){
+                inMultiComment = false;
+            }
+            else if(i != 0 && data_string.at(i) === '\n' && inSingleComment){
+                inSingleComment = false;
+            }
+            else if(i != 0 && data_string.at(i) === '\"'){
+                possibleToBeinComment = false;
+                codeCounter++;
+            }
+            else if(!inSingleComment && !inMultiComment){
+                codeCounter++;
+            }
+        }
+        else{
+            if(data_string.at(i) === '\"'){
+                possibleToBeinComment = true;
+            }
+            codeCounter++;
+        }
+    }
+
+    return codeCounter;
+}
+
+// SOMETHING FUN ABOUT javascript and node.js is that it will do things out of order so make sure that all of the information
+// that I am printing out ot the console make sense and if it need to be assiciated with a file that I am printing that
+// information all in hte same line or right together >:]
+function bug(data_string){
+    //console.log(data_string);
+   // let length_of_file_without_comments = getCodeLength(data_string);
+   // NOTE THIS IS WHAT IS DETREMINING HOW MANY BUGS ARE IN THE CODE IF THE NUBMER NEEDS TO BE ALTERED LOOK HERE first
+   let code_length = getCodeLength(data_string)
+    let randomNumberBug = Math.floor(Math.random()* 10)
+    let numOfBugs = (code_length % randomNumberBug) + 1;
+
+   while(numOfBugs != 0){
+    //Choose what type of bug randomly
+    //Choose what subjection of bug to insert
+    //Insert the bug into the code by removing or inserting code
+    // If the insertion is successful subtract the numOfBugs by 1
+    console.log(numOfBugs);
+    numOfBugs--;
+   }
+
+    console.log(num);
+    let return_string;
+    return retrun_string;
 }
 
 function bug_files_command(){
@@ -192,11 +258,9 @@ function bug_files_command(){
         console.log(typeof filesToModify.at(i))
         fs.readFile(filesToModify.at(i), (err,data)=>{
             if(err) throw err;
-            console.log(data.toString());
+            let string_after_bugging = bug(data.toString())
          })
-    }
-
-    
+    }  
     
     // for(let count_of_files = 0; count_of_files < filesToModify.length; count_of_files++){
     //     console.log("The file to modify is " + filesToModify.at(i));
