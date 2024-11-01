@@ -187,13 +187,11 @@ function open_previous_directory_command(){
 }
 
 function getCodeLength(data_string){
-/*
-*/
-//
     let codeCounter = 0;
     let inSingleComment = false;
     let inMultiComment = false;
     let possibleToBeinComment = true;
+
     for(let i = 0; i < data_string.length; i++){
         if(possibleToBeinComment){
             if(i != 0 && data_string.at(i) === '/' && data_string.at(i-1) === '/' && !inMultiComment){
@@ -223,30 +221,24 @@ function getCodeLength(data_string){
             codeCounter++;
         }
     }
-
     return codeCounter;
 }
 
-function functional_bug(data_string){
+function functional_bug(path){
 // change the data stirng 
-let successful = false
-return {
-    bugged: successful,
-    new_string: data_string
-}
+let successful = false;
 }
 
-function preprocesser_bug(data_string){
-    let successful = false
-    return {
-        bugged: successful,
-        new_string: data_string
-    }
+function preprocesser_bug(path){
+    let successful = false;
 }
 
-function syntax_bug(text_document){
-    let successful = false
+function syntax_bug(path){
+    let successful = false;
 
+    let text_document = vscode.workspace.openTextDocument(vscode.Uri.file(path)).then( doc => {
+        console.log(doc.getText());
+    });
     // GOing to attempt to use the api of syntax highlighting to get all the syntax from the file, prefroable 
     // as it is already a string...
 
@@ -254,75 +246,59 @@ function syntax_bug(text_document){
     const tokenTypes = ['class', 'interface', 'enum', 'function', 'variable'];
     const tokenModifiers = ['declaration', 'documentation'];
     const legend = new vscode.SemanticTokensLegend(tokenTypes, tokenModifiers);
-
-    
-    return {
-        bugged: successful,
-        new_string: data_string
-    }
+    return false;
 }
 
 
 // SOMETHING FUN ABOUT javascript and node.js is that it will do things out of order so make sure that all of the information
 // that I am printing out ot the console make sense and if it need to be assiciated with a file that I am printing that
 // information all in hte same line or right together >:]
-function bug(path){
+function bug(data_string, path){
+
+    
+    console.log(data_string);
     console.log(path);
-    let text_document = vscode.workspace.openTextDocument(vscode.Uri.file(path)).then( doc => {
-        console.log(doc.getText());
-    });
-    console.log(typeof text_document)
 
-    // let data_string = text_document.get
+    //  NOTE THIS IS WHAT IS DETREMINING HOW MANY BUGS ARE IN THE CODE IF THE NUBMER NEEDS TO BE ALTERED LOOK HERE first
+    let randomNumberBug = (Math.floor(Math.random()* 10) + 1) ;// Since random is 0 inclusive 
+    let numOfBugs = (getCodeLength(data_string) % randomNumberBug); 
 
-    // console.log(data_string);
-    //console.log(data_string);
-   // let length_of_file_without_comments = getCodeLength(data_string);
-   // NOTE THIS IS WHAT IS DETREMINING HOW MANY BUGS ARE IN THE CODE IF THE NUBMER NEEDS TO BE ALTERED LOOK HERE first
-//    let code_length = getCodeLength(data_string)
-//     let randomNumberBug = (Math.floor(Math.random()* 10) + 1) // Since random is 0 inclusive 
-//     let numOfBugs = (code_length % randomNumberBug); 
-//     let return_string = data_string;
-//     //Choose what type of bug randomly
-//     //Choose what subjection of bug to insert
-//     //Insert the bug into the code by removing or inserting code
-//     // If the insertion is successful subtract the numOfBugs by 1
-//     let consecutive_unsuccesful_bugs = 0;
-//    while(numOfBugs > 0){
+    console.log(numOfBugs);
 
-//     let bug =(Math.floor(Math.random()* 10) % BUG_TYPE.MOD);
-//     let successful_bug = false;
-//     console.log(bug);
+        //Choose what type of bug randomly
+        //Choose what subjection of bug to insert
+        //Insert the bug into the code by removing or inserting code
+        // If the insertion is successful subtract the numOfBugs by 1
+    let consecutive_unsuccesful_bugs = 0;
+    while(numOfBugs > 0){
+    
+        let bug = (Math.floor(Math.random()* 10) % BUG_TYPE.MOD);
+        let successful_bug = false;
+      //  console.log(bug);
+    
+        if(bug === BUG_TYPE.FUNCTIONAL){
+            successful_bug = functional_bug(path);
 
-//     if(bug === BUG_TYPE.FUNCTIONAL){
-//         const return_value = functional_bug(text_document);
-//         return_string = return_value.new_string;
-//         successful_bug = return_value.bugged;
-//     }
-//     else if(bug === BUG_TYPE.PREPROCESSOR){
-//         const return_value = preprocesser_bug(text_document);
-//         return_string = return_value.new_string;
-//         successful_bug = return_value.bugged;
-//     } 
-//     else if(bug === BUG_TYPE.SYNTAX){
-//         const return_value = syntax_bug(text_document);
-//         return_string = return_value.new_string;
-//         successful_bug = return_value.bugged;
-//     }
-
-//     if(successful_bug){
-//     numOfBugs--;
-//     }
-//     else if(consecutive_unsuccesful_bugs == 2){
-//         break;
-//     }
-//     else{
-//         consecutive_unsuccesful_bugs++;
-//     }
-//    }
-
-    //return retrun_string;
+        }
+        else if(bug === BUG_TYPE.PREPROCESSOR){
+            successful_bug = preprocesser_bug(path);
+        } 
+        else if(bug === BUG_TYPE.SYNTAX){
+            successful_bug = syntax_bug(path);
+        }
+    
+        if(successful_bug){
+            numOfBugs--;
+        }
+        else if(consecutive_unsuccesful_bugs == 2){
+            break;
+        }
+        else{
+            consecutive_unsuccesful_bugs++;
+        }
+    }
 }
+
 
 function bug_files_command(){
 
@@ -330,15 +306,13 @@ function bug_files_command(){
     console.log("here");
     console.log(filesToModify);
 
- 
 // Learned this here https://youtu.be/yQBw8skBdZU?si=bh5_ADuWAWO99xOI
     for(let i = 0; i < filesToModify.length ; i++){
         console.log("tring to read a file");
-       // console.log(typeof filesToModify.at(i))
-       // fs.readFile(filesToModify.at(i), (err,data)=>{
+        fs.readFile(filesToModify.at(i), (err,data)=>{
           //  if(err) throw err;
-        let string_after_bugging = bug(filesToModify.at(i))
-       //  })
+                bug(data.toString(), filesToModify.at(i))
+        })
     }  
     
     // for(let count_of_files = 0; count_of_files < filesToModify.length; count_of_files++){
