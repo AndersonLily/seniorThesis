@@ -11,6 +11,18 @@ const BUG_TYPE = {
     MOD: 3
 };
 
+const tokenTypes = ['asm', 'double', 'new',	'switch', 'auto', 'else',
+    'operator',	'template', 'break', 'enum', 'private',	'this', 'case',
+    'extern','protected', 'throw', 'catch',	'float', 'public', 'try',
+    'char',	'for',	'register',	'typedef',
+    'class',	'friend', 'return',	'union',
+    'const', 'goto',	'short',	'unsigned',
+    'continue',	'if',	'signed',	'virtual',
+    'default',	'inline',	'sizeof',	'void',
+    'delete' ,'int',	'static',	'volatile', 
+    'do',	'long',	'struct',	'while' ];
+ 
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 /**
@@ -69,7 +81,7 @@ function collectFiles_command(){
     }
     vscode.window.showOpenDialog(options).then(value => {
         if (value == undefined){
-            console.log("Inside console log");
+            console.log("Issue with opening a file selector");
             // Have a "THROW" for this issue Maybe?
         }else{
             //filtering out anything that isn't a .h .cpp or .c
@@ -77,7 +89,6 @@ function collectFiles_command(){
             let fileType = value.at(0).path.slice(startOfType, value.at(0).path.length)
 
             if(fileType === ".c" || fileType === ".cpp" || fileType === ".h"){
-            console.log(fileType)
             filesToModify.push(value.at(0))
             get_new_folder_name()
             updateSecondStatusBar('Create directory now', 'When you have collected all the files you want to bug select this button to collect them into the same directory', 'spider.createDirectory', true);
@@ -125,7 +136,7 @@ async function create_directory_command() {
                 let individual_Path = dirPath + "\\" + file_name;
             
                 await fs2.copyFile(filesToModify[count_of_files].fsPath, individual_Path);
-                console.log('source.txt was copied to destination.txt');
+                //console.log('source.txt was copied to destination.txt');
                 updateSecondStatusBar('Create directory now', 'When you have collected all the files you want to bug select this button to collect them into the same directory', 'spider.createDirectory', false);
             }catch {
                 console.error('The file could not be copied');
@@ -148,7 +159,7 @@ function open_previous_directory_command(){
 
      vscode.window.showOpenDialog(options).then(value => {
          if (value == undefined){
-             console.log("Inside console log");
+             console.log("Problem in open previous directory command");
              // Have a "THROW" for this issue 
          }else{
              //filtering out anything that isn't a .h .cpp or .c
@@ -176,15 +187,14 @@ function open_previous_directory_command(){
     }
 
     let newFile;
-    console.log("In get files");
     //try {
         const files = fs.readdirSync(dir);
         for (const file of files){
           newFile = dir + "/" + file
-         // console.log(" here %s",typeof newFile);
           filesToModify.push(newFile.toString());
         }
 }
+
 
 function getCodeLength(data_string){
     let codeCounter = 0;
@@ -224,29 +234,100 @@ function getCodeLength(data_string){
     return codeCounter;
 }
 
-function functional_bug(path){
+function functional_bug(data_string ,path){
 // change the data stirng 
 let successful = false;
+let return_string = data_string;
+
+
+
+return{
+    didBug: successful,
+    bugstring: return_string
+}
 }
 
-function preprocesser_bug(path){
-    let successful = false;
+function preprocesser_bug(data_string, path){
+  //  console.log("here");
+let successful = false;
+let return_string;
+// (Math.floor(Math.random()* 2))%2 == 0)
+if (true){
+// Removing a preprocessor command
+let definesPresent = [];
+//let each_character_code = [];
+
+// Finding the location of all the preprocessor commands
+for(let counter = 0; counter < data_string.length; counter++){
+    // individal = []
+    // individal.push(data_string.at(counter))
+    // individal.push((data_string.at(counter)).charCodeAt())
+    //each_character_code.push(individal);
+    if(data_string.at(counter) == '#'){
+        definesPresent.push(counter);
+    }
 }
 
-function syntax_bug(path){
+//console.log(each_character_code);
+
+//console.log(definesPresent);
+ let toRemove = (Math.floor(Math.random()* definesPresent.length));
+// console.log(toRemove);
+//console.log(definesPresent.at(toRemove));
+ 
+ // Here I have to look for " " or <> or define lines
+ let nextSpace = data_string.indexOf( "\r\n", definesPresent.at(toRemove));
+ //console.log(nextSpace);
+ 
+
+let substring = data_string.substr(definesPresent.at(toRemove), (nextSpace - definesPresent.at(toRemove)));
+
+console.log(substring)
+return_string = data_string.replace(substring, "");
+
+if(return_string.search(substring) == -1){
+    successful = true;
+}
+
+// Choose a random postion in the defines present array
+}else 
+{
+    return_string = "#define NULL = 1\n" + return_string;
+
+    didBug = true;
+ // Adding a preprocessor command   
+
+}
+
+return{
+    didBug: successful,
+    bugstring: return_string
+}
+}
+
+function syntax_bug(data_string, path){
     let successful = false;
+    let return_string = data_string;
 
-    let text_document = vscode.workspace.openTextDocument(vscode.Uri.file(path)).then( doc => {
-        console.log(doc.getText());
-    });
-    // GOing to attempt to use the api of syntax highlighting to get all the syntax from the file, prefroable 
-    // as it is already a string...
-
+    /*
     
-    const tokenTypes = ['class', 'interface', 'enum', 'function', 'variable'];
-    const tokenModifiers = ['declaration', 'documentation'];
-    const legend = new vscode.SemanticTokensLegend(tokenTypes, tokenModifiers);
-    return false;
+    */
+
+    // let text_document = vscode.workspace.openTextDocument(vscode.Uri.file(path)).then( doc => {
+    //     console.log(doc.getText());
+    // });
+    // // GOing to attempt to use the api of syntax highlighting to get all the syntax from the file, prefroable 
+    // // as it is already a string...
+
+    // const tokenTypes = ['class', 'interface', 'enum', 'function', 'variable'];
+    // const tokenModifiers = ['declaration', 'documentation'];
+    // const legend = new vscode.SemanticTokensLegend(tokenTypes, tokenModifiers);
+ 
+
+return{
+    didBug: successful,
+    bugstring: return_string
+}
 }
 
 
@@ -254,40 +335,42 @@ function syntax_bug(path){
 // that I am printing out ot the console make sense and if it need to be assiciated with a file that I am printing that
 // information all in hte same line or right together >:]
 function bug(data_string, path){
-
-    
-    console.log(data_string);
+   // console.log(data_string);
     console.log(path);
+
+    let return_string = data_string;
 
     //  NOTE THIS IS WHAT IS DETREMINING HOW MANY BUGS ARE IN THE CODE IF THE NUBMER NEEDS TO BE ALTERED LOOK HERE first
     let randomNumberBug = (Math.floor(Math.random()* 10) + 1) ;// Since random is 0 inclusive 
     let numOfBugs = (getCodeLength(data_string) % randomNumberBug); 
 
-    console.log(numOfBugs);
+  //  console.log(numOfBugs);
 
         //Choose what type of bug randomly
         //Choose what subjection of bug to insert
         //Insert the bug into the code by removing or inserting code
         // If the insertion is successful subtract the numOfBugs by 1
     let consecutive_unsuccesful_bugs = 0;
+    // TEMPORARY RESERT OF NUMOF BUGS TO BE 1 always 
+    numOfBugs = 1;
     while(numOfBugs > 0){
     
         let bug = (Math.floor(Math.random()* 10) % BUG_TYPE.MOD);
-        let successful_bug = false;
-      //  console.log(bug);
+        let successful_bug;
     
-        if(bug === BUG_TYPE.FUNCTIONAL){
-            successful_bug = functional_bug(path);
+       // if(bug === BUG_TYPE.FUNCTIONAL){
+       //     successful_bug = functional_bug(return_string, path);
 
-        }
-        else if(bug === BUG_TYPE.PREPROCESSOR){
-            successful_bug = preprocesser_bug(path);
-        } 
-        else if(bug === BUG_TYPE.SYNTAX){
-            successful_bug = syntax_bug(path);
-        }
-    
-        if(successful_bug){
+       // }
+       // else if(bug === BUG_TYPE.PREPROCESSOR){
+            successful_bug = preprocesser_bug(return_string, path);
+            return_string = successful_bug.bugstring;
+       // } 
+       // else if(bug === BUG_TYPE.SYNTAX){
+        //    successful_bug = syntax_bug(return_string, path);
+      //  }
+    //successful_bug.didBug
+        if(successful_bug.didBug){
             numOfBugs--;
         }
         else if(consecutive_unsuccesful_bugs == 2){
@@ -297,14 +380,18 @@ function bug(data_string, path){
             consecutive_unsuccesful_bugs++;
         }
     }
+
+    // ONCE OUT OF THE WHILE LOOP HERE I WOULD WRITE TO THE FILE :) 
+    // OR RETURN THE string and write where the bug funtion was called :)
+   console.log(return_string);
+
+    console.log(" ");
 }
 
 
 function bug_files_command(){
 
     get_files_from_spider_directory(current_directory);
-    console.log("here");
-    console.log(filesToModify);
 
 // Learned this here https://youtu.be/yQBw8skBdZU?si=bh5_ADuWAWO99xOI
     for(let i = 0; i < filesToModify.length ; i++){
