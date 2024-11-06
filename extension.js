@@ -21,7 +21,24 @@ const tokenTypes = ['asm', 'double', 'new',	'switch', 'auto', 'else',
     'default',	'inline',	'sizeof',	'void',
     'delete' ,'int',	'static',	'volatile', 
     'do',	'long',	'struct',	'while' ];
- 
+
+const includesInC = ['<algorithm>',	'<iomanip>', '<list>', '<ostream>',
+	'<streambuf>', '<bitset>', '<ios>',	'<locale>',	'<queue>',	'<string>',
+    '<complex>', '<iosfwd>','<map>','<set>', '<typeinfo>', '<deque>', '<iostream>',
+    '<memory>',	'<sstream>','<utility>', '<exception>',	'<istream>','<new>','<stack>',
+    '<valarray>,', '<fstream>',	'<iterator>', '<numeric>',	'<stdexcept>',	'<vector>',
+    '<functional>',	'<limits>',	'<array>', '<condition_variable>', '<mutex>', '<scoped_allocator>',
+    '<type_traits>', '<atomic>','<forward_list>','<random>', '<system_error>',	'<typeindex>',
+    '<chrono>',	'<future>',	'<ratio>',	'<thread>',	'<unordered_map>', '<codecvt>',	'<initializer_list>',
+    '<regex>', '<tuple>', '<unordered_set>', '<shared_mutex>', '<any>',	'<execution>',	'<memory_resource>',
+    '<string_view>', '<variant>', '<charconv>',	'<filesystem>',	'<optional>', '<barrier>',	'<concepts>',
+    '<latch>', '<semaphore>', '<stop_token>', '<bit>', '<coroutine>', '<numbers>', '<source_location>',	
+    '<syncstream>', '<compare>','<format>',	'<ranges>',	'<span>', '<version>', '<expected>','<flat_set>',
+    '<mdspan>',	'<spanstream>',	'<stdfloat>', '<flat_map>',	'<generator>', '<print>','<stacktrace>',
+    '<debugging>',	'<inplace_vector>',	'<linalg>',	'<rcu>','<text_encoding>','<hazard_pointer>',
+    '<cassert>', '<clocale>', '<cstdarg>','<cstring>','<cctype>','<cmath>',	'<cstddef>','<ctime>',
+    '<cerrno>',	'<csetjmp>',	'<cstdio>',	'<cwchar>','<cfloat>',	'<csignal>',	'<cstdlib>',
+    '<cwctype>', '<climits>'];
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -248,55 +265,112 @@ return{
 }
 
 function preprocesser_bug(data_string, path){
-  //  console.log("here");
 let successful = false;
 let return_string;
-// (Math.floor(Math.random()* 2))%2 == 0)
-if (true){
+
+const doRemove = ((Math.floor(Math.random()* 2))%2 == 0);
+if (doRemove){
 // Removing a preprocessor command
-let definesPresent = [];
-//let each_character_code = [];
+    let definesPresent = [];
 
-// Finding the location of all the preprocessor commands
-for(let counter = 0; counter < data_string.length; counter++){
-    // individal = []
-    // individal.push(data_string.at(counter))
-    // individal.push((data_string.at(counter)).charCodeAt())
-    //each_character_code.push(individal);
-    if(data_string.at(counter) == '#'){
-        definesPresent.push(counter);
+    // Finding the location of all the preprocessor commands
+    for(let counter = 0; counter < data_string.length; counter++){
+        // If the # is present put it into the define_present
+        if(data_string.at(counter) == '#'){
+            definesPresent.push(counter);
+        }
     }
-}
 
-//console.log(each_character_code);
+    if(definesPresent.length != 0){
+        // Grab the string to remove from the string of all the text in the .cpp or .h file
+        let toRemove = (Math.floor(Math.random()* definesPresent.length));
+        let nextSpace = data_string.indexOf( "\r\n", definesPresent.at(toRemove));
+        let substring = data_string.substr(definesPresent.at(toRemove), (nextSpace - definesPresent.at(toRemove)));
 
-//console.log(definesPresent);
- let toRemove = (Math.floor(Math.random()* definesPresent.length));
-// console.log(toRemove);
-//console.log(definesPresent.at(toRemove));
- 
- // Here I have to look for " " or <> or define lines
- let nextSpace = data_string.indexOf( "\r\n", definesPresent.at(toRemove));
- //console.log(nextSpace);
- 
+        return_string = data_string.replace(substring, "");
 
-let substring = data_string.substr(definesPresent.at(toRemove), (nextSpace - definesPresent.at(toRemove)));
-
-console.log(substring)
-return_string = data_string.replace(substring, "");
-
-if(return_string.search(substring) == -1){
-    successful = true;
-}
-
-// Choose a random postion in the defines present array
+        if(return_string.search(substring) == -1){
+            successful = true;
+        }   
+    }
 }else 
 {
-    return_string = "#define NULL = 1\n" + return_string;
+    return_string = data_string;
+    // This will be randomized 8 is chosen because there are 8 cases.
+    const whichCase = (Math.floor(Math.random()* 8));
+    switch(whichCase) {
+        case 0:
+            //Insert a random C++ standard libary include
+            const what_include_to_add = includesInC.at((Math.floor(Math.random()* includesInC.length)));
+            //This extention is currently written for a windows machine, having it only add
+            // \n potentially could mean that the extetnion won't removed it if the remove bug is chosen
+            // next because it only removed when it finds a \r\n, more testing would be nessesary to 
+            // catch this edge case.
+            return_string = "#include " + what_include_to_add + "\n" + return_string;
+            break;
+        case 1:
+          //Insert a random mispelled C++ standard libary include
+          //Learned that javascript strings are immutiable 
+          let what_include_to_scramble = includesInC.at((Math.floor(Math.random()* includesInC.length)));
 
-    didBug = true;
- // Adding a preprocessor command   
-
+          for(let counter = 0; counter < what_include_to_scramble.length - 1; counter++){
+            
+            if(what_include_to_scramble.length % counter == 0 && counter > 0){
+               // Steps are seperated for readablility
+               let temp = what_include_to_scramble.substring(0, counter);
+               temp = temp + what_include_to_scramble.at(counter + 1);
+               temp = temp + what_include_to_scramble.at(counter) 
+               temp = temp + what_include_to_scramble.substring(counter + 2, what_include_to_scramble.length);
+               what_include_to_scramble = temp;
+            }
+          }
+            //This extention is currently written for a windows machine, having it only add
+            // \n potentially could mean that the extetnion won't removed it if the remove bug is chosen
+            // next because it only removed when it finds a \r\n, more testing would be nessesary to 
+            // catch this edge case.
+            return_string = "#include " + what_include_to_scramble + "\n" + return_string;
+          break;
+        case 2:
+          //Insert a random define statment that undefines a token
+          const what_token_to_undefine = tokenTypes.at((Math.floor(Math.random()* tokenTypes.length)));
+          return_string = "#undef " + what_token_to_undefine + "\n" + return_string;
+          break;
+        case 3:
+            //Insert a define statment that changes the value of a token to another token
+            const token1 = tokenTypes.at((Math.floor(Math.random()* tokenTypes.length)));
+            const token2 = tokenTypes.at((Math.floor(Math.random()* tokenTypes.length)));
+            return_string = "#define " + token1 + " " + token2+ "\n" + return_string;
+          break;
+        case 4:
+          //Insert a define statment that changes the value of a token to number
+          const what_token_to_change_def = tokenTypes.at((Math.floor(Math.random()* tokenTypes.length)));
+          return_string = "#define " + what_token_to_change_def + " " + (Math.floor(Math.random()* 1000)) +"\n" + return_string;
+          break;
+        case 5:
+          //ADD impossible and #if #endif
+          const where_to_insert_endif = (Math.floor(Math.random()* data_string.length));
+          let temp2 = "#if 0\n" + data_string.substring(0, where_to_insert_endif);
+          temp2 = temp2 + "\n#endif\n" + data_string.substring(where_to_insert_endif, data_string.length);
+          return_string = temp2;
+          break;
+        case 6:
+          //ADD only #include
+          return_string = "#include \n" + return_string;
+          break;
+        case 7:
+          //ADD only # endif
+          const where_to_insert__only_endif = (Math.floor(Math.random()* data_string.length));
+          let temp3 = data_string.substring(0, where_to_insert__only_endif);
+          temp3 = temp3 + "\n#endif\n" + data_string.substring(where_to_insert__only_endif, data_string.length);
+          return_string = temp3;
+            break;
+        default:
+          //Redefine NULL :)
+          return_string = "#define NULL = 1\n" + return_string;
+      }
+    if(data_string.localeCompare(return_string) != 0){
+        successful = true;
+    } 
 }
 
 return{
@@ -385,7 +459,7 @@ function bug(data_string, path){
     // OR RETURN THE string and write where the bug funtion was called :)
    console.log(return_string);
 
-    console.log(" ");
+   console.log(" ");
 }
 
 
