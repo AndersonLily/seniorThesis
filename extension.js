@@ -266,7 +266,7 @@ return{
 
 function preprocesser_bug(data_string, path){
 let successful = false;
-let return_string;
+let return_string = data_string;
 
 const doRemove = ((Math.floor(Math.random()* 2))%2 == 0);
 if (doRemove){
@@ -383,31 +383,123 @@ function syntax_bug(data_string, path){
     let successful = false;
     let return_string = data_string;
 
-    /*
+
+    //const doRemove = ((Math.floor(Math.random()* 2))%2 == 0);
+    if (true){
+        // This will remove something in the code that causes a syntax error
+
+    const whichCase = (Math.floor(Math.random()* 3));
+
+     switch(whichCase) {
+        case 0:
+            //This will delete a single parenthesis to unbalance them
+            let parenthesisPresent = [];
+            // Finding the location of all the parenthesis 
+            for(let counter = 0; counter < data_string.length; counter++){
+                // If the # is present put it into the define_present
+                if(data_string.at(counter) == '(' || data_string.at(counter) == ')'){
+                    parenthesisPresent.push(counter);
+                }
+            }
+
+            if(parenthesisPresent.length != 0){
+                // Grab the string to remove from the string of all the text in the .cpp or .h file
+                let toRemove = (Math.floor(Math.random()* parenthesisPresent.length));
+                let temp = data_string.substr(0, parenthesisPresent.at(toRemove));
+                return_string = temp + data_string.substr(parenthesisPresent.at(toRemove) + 1, data_string.length);
     
-    */
+                if(data_string != return_string){
+                    successful = true;
+                }   
+            }
+           
+            break;
+        case 1:
+            // This will remove a semicolon
+            let semiPresent = [];
+            // Finding the location of all the semicolons 
+            for(let counter = 0; counter < data_string.length; counter++){
+                // If the ; is present put it into the define_present
+                if(data_string.at(counter) == ';'){
+                    semiPresent.push(counter);
+                }
+            }
 
-    // let text_document = vscode.workspace.openTextDocument(vscode.Uri.file(path)).then( doc => {
-    //     console.log(doc.getText());
-    // });
-    // // GOing to attempt to use the api of syntax highlighting to get all the syntax from the file, prefroable 
-    // // as it is already a string...
+            if(semiPresent.length != 0){
+                // Grab the string to remove from the string of all the text in the .cpp or .h file
+                let toRemove = (Math.floor(Math.random()* semiPresent.length));
+                return_string = data_string.substr(0, semiPresent.at(toRemove));
+                return_string = return_string + data_string.substr(semiPresent.at(toRemove) + 1, data_string.length);
+    
+                if(data_string != return_string){
+                    successful = true;
+                }   
+            }
+            break;
 
-    // const tokenTypes = ['class', 'interface', 'enum', 'function', 'variable'];
-    // const tokenModifiers = ['declaration', 'documentation'];
-    // const legend = new vscode.SemanticTokensLegend(tokenTypes, tokenModifiers);
- 
+        case 2:
+            // This will remove the start or ending qoutes for any strings 
+            let qoutePresent = [];
+            // Finding the location of all the qoutes
+            for(let counter = 0; counter < data_string.length; counter++){
+                // If the " is present put it into the define_present
+                if(data_string.at(counter) == '\"'){
+                    qoutePresent.push(counter);
+                }
+            }
 
-return{
-    didBug: successful,
-    bugstring: return_string
+            if(qoutePresent.length != 0){
+                // Grab the string to remove from the string of all the text in the .cpp or .h file
+                let toRemove = (Math.floor(Math.random()* qoutePresent.length));
+                return_string = data_string.substr(0, qoutePresent.at(toRemove));
+                return_string = return_string + data_string.substr(qoutePresent.at(toRemove) + 1, data_string.length);
+    
+                if(data_string != return_string){
+                    successful = true;
+                }   
+            }
+
+         break;
+
+        default:
+
+        let returnPresent = [];
+
+        let tempString = data_string;
+        let lastIndex = 0;
+        // Finding the location of all the preprocessor commands
+        while(tempString.indexOf("return", lastIndex) != -1 ){
+                let looking_str = "return"
+                returnPresent.push(tempString.indexOf(looking_str, lastIndex));
+                lastIndex = tempString.indexOf(looking_str, lastIndex) + looking_str.length
+        }
+
+        if(returnPresent.length != 0){
+            // Grab the string to remove from the string of all the text in the .cpp or .h file
+            let toRemove = (Math.floor(Math.random()* returnPresent.length));
+            let nextSpace = data_string.indexOf( "\r\n", returnPresent.at(toRemove));
+            let substring = data_string.substr(returnPresent.at(toRemove), (nextSpace - returnPresent.at(toRemove)));
+    
+            return_string = data_string.replace(substring, "");
+    
+            if(return_string.search(substring) == -1){
+                successful = true;
+            }   
+        }
+    }
 }
+else{
+    // This add something in the code that causes a syntax error
+
+}
+
+    return{
+         didBug: successful,
+        bugstring: return_string
+    }
 }
 
 
-// SOMETHING FUN ABOUT javascript and node.js is that it will do things out of order so make sure that all of the information
-// that I am printing out ot the console make sense and if it need to be assiciated with a file that I am printing that
-// information all in hte same line or right together >:]
 function bug(data_string, path){
    // console.log(data_string);
     console.log(path);
@@ -433,15 +525,17 @@ function bug(data_string, path){
         let successful_bug;
     
        // if(bug === BUG_TYPE.FUNCTIONAL){
-       //     successful_bug = functional_bug(return_string, path);
-
+           // successful_bug = functional_bug(return_string, path);
+            //return_string = successful_bug.bugstring;
        // }
        // else if(bug === BUG_TYPE.PREPROCESSOR){
-            successful_bug = preprocesser_bug(return_string, path);
-            return_string = successful_bug.bugstring;
+           // successful_bug = preprocesser_bug(return_string, path);
+            //return_string = successful_bug.bugstring;
        // } 
        // else if(bug === BUG_TYPE.SYNTAX){
-        //    successful_bug = syntax_bug(return_string, path);
+             successful_bug = syntax_bug(return_string, path);
+              return_string = successful_bug.bugstring;
+              console.log(successful_bug.bugstring);
       //  }
     //successful_bug.didBug
         if(successful_bug.didBug){
@@ -457,7 +551,7 @@ function bug(data_string, path){
 
     // ONCE OUT OF THE WHILE LOOP HERE I WOULD WRITE TO THE FILE :) 
     // OR RETURN THE string and write where the bug funtion was called :)
-   console.log(return_string);
+  // console.log(return_string);
 
    console.log(" ");
 }
@@ -552,3 +646,23 @@ module.exports = {
 	activate,
 	deactivate
 }
+
+
+
+
+
+
+ /*
+    
+    */
+
+    // let text_document = vscode.workspace.openTextDocument(vscode.Uri.file(path)).then( doc => {
+    //     console.log(doc.getText());
+    // });
+    // // GOing to attempt to use the api of syntax highlighting to get all the syntax from the file, prefroable 
+    // // as it is already a string...
+
+    // const tokenTypes = ['class', 'interface', 'enum', 'function', 'variable'];
+    // const tokenModifiers = ['declaration', 'documentation'];
+    // const legend = new vscode.SemanticTokensLegend(tokenTypes, tokenModifiers);
+ 
