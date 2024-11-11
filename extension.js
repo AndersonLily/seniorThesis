@@ -296,7 +296,7 @@ if (doRemove){
 }else 
 {
     return_string = data_string;
-    // This will be randomized 8 is chosen because there are 8 cases.
+    // This will be randomized 8 is chosen because there are 8 cases (seven and 1 default).
     const whichCase = (Math.floor(Math.random()* 8));
     switch(whichCase) {
         case 0:
@@ -385,7 +385,7 @@ function syntax_bug(data_string, path){
 
 
     //const doRemove = ((Math.floor(Math.random()* 2))%2 == 0);
-    if (true){
+    if (false){
         // This will remove something in the code that causes a syntax error
 
     const whichCase = (Math.floor(Math.random()* 3));
@@ -490,6 +490,70 @@ function syntax_bug(data_string, path){
 }
 else{
     // This add something in the code that causes a syntax error
+
+    //const whichCase = (Math.floor(Math.random()* 8));
+    switch(2) {
+        case 0:
+            //This will add a parenthesis next to an existing parenthesis.
+            let parenthesisPresent = [];
+            // Finding the location of all the parenthesis 
+            for(let counter = 0; counter < data_string.length; counter++){
+                // If the # is present put it into the define_present
+                if(data_string.at(counter) == '(' || data_string.at(counter) == ')'){
+                    parenthesisPresent.push(counter);
+                }
+            }
+
+            if(parenthesisPresent.length != 0){
+                //This will add the same type of parenthesis (open matches open, close matches close as if there was a double click)
+                let toAddNextToo = (Math.floor(Math.random()* parenthesisPresent.length));
+                let temp = data_string.substr(0, parenthesisPresent.at(toAddNextToo)+ 1) + data_string.at(parenthesisPresent.at(toAddNextToo));
+                return_string = temp + data_string.substr(parenthesisPresent.at(toAddNextToo) + 1, data_string.length);
+    
+                if(data_string != return_string){
+                    successful = true;
+                }   
+            }
+            break;
+
+        case 1:
+            // This will insert a semi colon in hte middle of any line.
+            const where_to_insert_semi = (Math.floor(Math.random()* data_string.length));
+            let temp = data_string.substring(0, where_to_insert_semi);
+            temp = temp + ";" + data_string.substring(where_to_insert_semi, data_string.length);
+            return_string = temp;
+            break;
+        case 2:
+            // This will add a qoute next to any existing qoute.
+            let qoutePresent = [];
+            // Finding the location of all the qoutes 
+            for(let counter = 0; counter < data_string.length; counter++){
+                if(data_string.at(counter) == "\""){
+                    qoutePresent.push(counter);
+                }
+            }
+
+            if(qoutePresent.length != 0){
+                let toAddNextToo = (Math.floor(Math.random()* qoutePresent.length));
+                let temp = data_string.substr(0, qoutePresent.at(toAddNextToo)+ 1) + data_string.at(qoutePresent.at(toAddNextToo));
+                return_string = temp + data_string.substr(qoutePresent.at(toAddNextToo) + 1, data_string.length);
+    
+                if(data_string != return_string){
+                    successful = true;
+                }   
+            }
+            break;
+
+        case 3:
+            // This will as a return statment right before a closing brace.
+            
+            break;
+
+        default:
+    }
+
+
+
 
 }
 
@@ -665,4 +729,3 @@ module.exports = {
     // const tokenTypes = ['class', 'interface', 'enum', 'function', 'variable'];
     // const tokenModifiers = ['declaration', 'documentation'];
     // const legend = new vscode.SemanticTokensLegend(tokenTypes, tokenModifiers);
- 
