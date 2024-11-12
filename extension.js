@@ -85,7 +85,7 @@ function startup_command(){
         else if (selection === old_directory){
             updateSpiderStatusBar('Spider - Open Directory', 'Select the directory that contains the files you want to search for bugs in', 'spider.openPreviousDirectory');
          }
-        });
+        }); //tee hee
 }
 
 function collectFiles_command(){
@@ -125,7 +125,7 @@ const yyyy = today.getFullYear();
 const mm = today.getMonth() + 1; 
 const  dd = today.getDate();
 
-const formattedToday = dd + '-' + mm + '-' + yyyy;
+const formattedToday = dd + '-' + mm + '-' + yyyy;  //'-'
 
 // TODO: the fs.path needs to be altered to not have double slashes :)
 current_directory = vscode.workspace.workspaceFolders[0].uri.fsPath + "/" + "Spider-" + formattedToday;
@@ -492,7 +492,7 @@ else{
     // This add something in the code that causes a syntax error
 
     //const whichCase = (Math.floor(Math.random()* 8));
-    switch(2) {
+    switch(4) {
         case 0:
             //This will add a parenthesis next to an existing parenthesis.
             let parenthesisPresent = [];
@@ -545,8 +545,81 @@ else{
             break;
 
         case 3:
+            // TODO: HAVE THE RETRUN HAVE THE SAME INDENTATION 
             // This will as a return statment right before a closing brace.
-            
+            let endBracePresent = [];
+            // Finding the location of all the qoutes 
+            for(let counter = 0; counter < data_string.length; counter++){
+                if(data_string.at(counter) == "}"){
+                    endBracePresent.push(counter);
+                }
+            }
+
+            if(endBracePresent.length != 0){
+                let toAddNextToo = (Math.floor(Math.random()* endBracePresent.length));
+                let temp = data_string.substr(0, endBracePresent.at(toAddNextToo)) + "return 0; \n";
+                return_string = temp + data_string.substr(endBracePresent.at(toAddNextToo), data_string.length);
+    
+                if(data_string != return_string){
+                    successful = true;
+                }   
+            }
+
+            break;
+
+        case 4:
+            // Find all the variables, gather their names and change the spelling in one use of the program
+            let just_variable_vector = ['double', 'float', 'char',	'short', 'int'];
+
+            let lastIndex = 0;
+            let tempString = data_string;
+
+            // Finding all the included .h files ie string, vector or user created classes
+           while(tempString.indexOf(".h", lastIndex) != -1 ){
+
+            let next_space = data_string.indexOf("\r\n", tempString.indexOf(".h", lastIndex))
+                 // Go backwards to get the full name of the included class
+                for(let i = tempString.indexOf(".h", lastIndex); i > 0; i--){
+                    if(tempString.at(i) == "\""){
+                        just_variable_vector.push(tempString.substr(i + 1, ((tempString.indexOf(".h", lastIndex) - 1) - i)));
+                        break;
+                    }
+                }
+                lastIndex = next_space;
+            }
+
+            console.log(just_variable_vector);
+
+            //NOW get all of the variables names
+            let variable_names = [];
+            for(let counter = 0; counter < just_variable_vector.length; counter++){
+                 // reset for next loop
+                lastIndex = 0;
+                while(tempString.indexOf(just_variable_vector.at(counter), lastIndex) != -1 ){
+
+                    let declaration = tempString.indexOf(just_variable_vector.at(counter), lastIndex);
+
+                    let next_space = 0;
+                         // Go forwards to get where the first = , ; ) is 
+                        for(let i = declaration; i < tempString.length; i++){
+                            if(tempString.at(i) == "(" ||tempString.at(i) == "{" || tempString.at(i) == ":" || tempString.at(i) == "\r\n" || tempString.at(i) == "\'" || tempString.at(i) == "."){
+                                next_space = i;
+                                break;
+                            }
+
+                            if(tempString.at(i) == ";" || tempString.at(i) == "=" || tempString.at(i) == "," || tempString.at(i) == ")" ){
+                                next_space = i;
+                                console.log(tempString.substr(declaration, i - declaration));
+                               // variable_names.push();
+                                break;
+                            }
+                        }
+                        lastIndex = next_space;
+                }  
+            }
+
+           console.log(variable_names);
+
             break;
 
         default:
@@ -594,12 +667,12 @@ function bug(data_string, path){
        // }
        // else if(bug === BUG_TYPE.PREPROCESSOR){
            // successful_bug = preprocesser_bug(return_string, path);
-            //return_string = successful_bug.bugstring;
+           // return_string = successful_bug.bugstring;
        // } 
        // else if(bug === BUG_TYPE.SYNTAX){
              successful_bug = syntax_bug(return_string, path);
               return_string = successful_bug.bugstring;
-              console.log(successful_bug.bugstring);
+             // console.log(successful_bug.bugstring);
       //  }
     //successful_bug.didBug
         if(successful_bug.didBug){
