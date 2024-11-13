@@ -305,16 +305,82 @@ function getAllVariableTypes(data_string){
     return variable_names
 }
 
+function locationInBraces(data_string){
+     // This will return a random value that is within braces
+     let return_val = 0;
+     let BracesisPresent = [];
+     // Finding the location of all the parenthesis 
+     for(let counter = 0; counter < data_string.length; counter++){
+         // If the # is present put it into the define_present
+         if(data_string.at(counter) == '{'){
+            BracesisPresent.push(counter);
+         }
+     }
+
+     if(BracesisPresent.length != 0){
+         let toAddNextToo = (Math.floor(Math.random()* BracesisPresent.length));
+         for(let i = BracesisPresent.at(toAddNextToo); i < data_string.length; i++)
+         {
+            if(data_string.at(i) == '\r\n' || data_string.at(i) == ';'){
+                return_val =  i + 1;
+                break;
+             }else if(data_string.at(i) == '}'){
+                return_val =  i - 1;
+                break;
+             }
+         }
+     }
+    return return_val;
+}
+
 function functional_bug(data_string, path){
 // change the data stirng 
 let successful = false;
 let return_string = data_string;
 
-let what_switch = (Math.floor(Math.random()* 13));
-switch(what_switch){
+//let what_switch = (Math.floor(Math.random()* 13));
+switch(1){
     case 0:
+        // Add an infinite for loop 
+         const where_to_inf_for = locationInBraces(data_string);
+        // console.log(where_to_inf_for);
+          return_string = data_string.substring(0, where_to_inf_for);
+          return_string =  return_string + "\n      for(int i = 0; i < 10; i++){\n          i--;\n        }" + data_string.substring(where_to_inf_for, data_string.length);
         break;
     case 1:
+        console.log("here");
+        let var_names = getAllVariableTypes(data_string);
+
+        if (var_names.length != 0){
+            console.log("here_1");
+            let tempString = data_string;
+            let find_var = var_names.at((Math.floor(Math.random()* var_names.length)));
+    
+            let what_variable_to_delete = tempString.indexOf(find_var);
+           
+            let right_end = 0;
+            let left_end = 0;
+            // Find where the variable declaration right end
+            for(let counter = what_variable_to_delete; counter < data_string.length; counter ++){
+                if(data_string.at(counter) == "\r\n" || data_string.at(counter) == ";" || data_string.at(counter) == ","){
+                    console.log("here_2");
+                    right_end = counter;
+                    break;
+                }
+            }
+            // Find where the variable declaration left end
+            for(let counter = what_variable_to_delete; counter < data_string.length; counter--){
+                if(data_string.at(counter) == "\r\n" || data_string.at(counter) == ";" || data_string.at(counter) == "("){
+                    console.log("here_3");
+                    left_end = counter;
+                    break;
+                }
+            }
+            console.log("here_4");
+            console.log(left_end);
+            console.log(right_end);
+        } 
+
         break;
     case 2:
         break;
@@ -339,7 +405,7 @@ switch(what_switch){
     case 12:
         break;
     default:
-        
+
 
 }
 
@@ -737,16 +803,16 @@ function bug(data_string, path){
         let successful_bug;
     
        // if(bug === BUG_TYPE.FUNCTIONAL){
-           // successful_bug = functional_bug(return_string, path);
-            //return_string = successful_bug.bugstring;
+           successful_bug = functional_bug(return_string, path);
+            return_string = successful_bug.bugstring;
        // }
        // else if(bug === BUG_TYPE.PREPROCESSOR){
            // successful_bug = preprocesser_bug(return_string, path);
            // return_string = successful_bug.bugstring;
        // } 
        // else if(bug === BUG_TYPE.SYNTAX){
-             successful_bug = syntax_bug(return_string, path);
-              return_string = successful_bug.bugstring;
+            // successful_bug = syntax_bug(return_string, path);
+             // return_string = successful_bug.bugstring;
               console.log(successful_bug.bugstring);
       //  }
     //successful_bug.didBug
