@@ -251,10 +251,102 @@ function getCodeLength(data_string){
     return codeCounter;
 }
 
-function functional_bug(data_string ,path){
+
+function getAllVariableTypes(data_string){
+     // Find all the variables, gather their names and change the spelling in one use of the program
+     let just_variable_vector = ['double', 'float', 'char',	'short', 'int'];
+
+     let lastIndex = 0;
+     let tempString = data_string;
+
+     // Finding all the included .h files ie string, vector or user created classes
+    while(tempString.indexOf(".h", lastIndex) != -1 ){
+
+     let next_space = data_string.indexOf("\r\n", tempString.indexOf(".h", lastIndex))
+          // Go backwards to get the full name of the included class
+         for(let i = tempString.indexOf(".h", lastIndex); i > 0; i--){
+             if(tempString.at(i) == "\""){
+                 just_variable_vector.push(tempString.substr(i + 1, ((tempString.indexOf(".h", lastIndex) - 1) - i)));
+                 break;
+             }
+         }
+         lastIndex = next_space;
+     }
+
+     //NOW get all of the variables names
+     let variable_names = [];
+     for(let counter = 0; counter < just_variable_vector.length; counter++){
+          // reset for next loop
+         lastIndex = 0;
+         while(tempString.indexOf(just_variable_vector.at(counter), lastIndex) != -1 ){
+
+             let declaration = tempString.indexOf(just_variable_vector.at(counter), lastIndex);
+
+             let next_space = 0;
+                  // Go forwards to get where the first = , ; ) is 
+                 for(let i = declaration; i < tempString.length; i++){
+                     if(tempString.at(i) == "(" ||tempString.at(i) == "{" || tempString.at(i) == ":" || tempString.at(i) == "\r\n" || tempString.at(i) == "\'" || tempString.at(i) == "."){
+                         next_space = i;
+                         break;
+                        }
+
+                     if(tempString.at(i) == ";" || tempString.at(i) == "=" || tempString.at(i) == "," || tempString.at(i) == ")" ){
+                         next_space = i;
+                         let space = tempString.substr(declaration, i - declaration);
+                         space = space.substr(space.indexOf(" ") + 1, space.length);
+                         variable_names.push(space);
+                         break;
+                        }
+                    }
+                lastIndex = next_space;
+            }  
+        }
+
+    return variable_names
+}
+
+function functional_bug(data_string, path){
 // change the data stirng 
 let successful = false;
 let return_string = data_string;
+
+let what_switch = (Math.floor(Math.random()* 13));
+switch(what_switch){
+    case 0:
+        break;
+    case 1:
+        break;
+    case 2:
+        break;
+    case 3:
+        break;
+    case 4:
+        break;
+    case 5:
+        break;
+    case 6:
+        break;
+    case 7:
+        break;
+    case 8:
+        break;
+    case 9:
+        break;
+    case 10:
+        break;
+    case 11:
+        break;
+    case 12:
+        break;
+    default:
+        
+
+}
+
+
+if(data_string != return_string){
+    successful = true;
+} 
 
 
 
@@ -384,13 +476,13 @@ function syntax_bug(data_string, path){
     let return_string = data_string;
 
 
-    //const doRemove = ((Math.floor(Math.random()* 2))%2 == 0);
-    if (false){
+    const doRemove = ((Math.floor(Math.random()* 2))%2 == 0);
+    if (doRemove){
         // This will remove something in the code that causes a syntax error
 
-    const whichCase = (Math.floor(Math.random()* 3));
+        const what_switch = (Math.floor(Math.random()* 3));
 
-     switch(whichCase) {
+     switch(what_switch) {
         case 0:
             //This will delete a single parenthesis to unbalance them
             let parenthesisPresent = [];
@@ -489,10 +581,11 @@ function syntax_bug(data_string, path){
     }
 }
 else{
-    // This add something in the code that causes a syntax error
+    // This add something in the code that causes a syntax error or change existing code
 
-    //const whichCase = (Math.floor(Math.random()* 8));
-    switch(4) {
+    // Purposely a larger number so the defualt case is more likely.
+    const what_switch = (Math.floor(Math.random()* 6));
+    switch(what_switch) {
         case 0:
             //This will add a parenthesis next to an existing parenthesis.
             let parenthesisPresent = [];
@@ -567,69 +660,51 @@ else{
 
             break;
 
-        case 4:
-            // Find all the variables, gather their names and change the spelling in one use of the program
-            let just_variable_vector = ['double', 'float', 'char',	'short', 'int'];
-
-            let lastIndex = 0;
-            let tempString = data_string;
-
-            // Finding all the included .h files ie string, vector or user created classes
-           while(tempString.indexOf(".h", lastIndex) != -1 ){
-
-            let next_space = data_string.indexOf("\r\n", tempString.indexOf(".h", lastIndex))
-                 // Go backwards to get the full name of the included class
-                for(let i = tempString.indexOf(".h", lastIndex); i > 0; i--){
-                    if(tempString.at(i) == "\""){
-                        just_variable_vector.push(tempString.substr(i + 1, ((tempString.indexOf(".h", lastIndex) - 1) - i)));
-                        break;
-                    }
-                }
-                lastIndex = next_space;
-            }
-
-            console.log(just_variable_vector);
-
-            //NOW get all of the variables names
-            let variable_names = [];
-            for(let counter = 0; counter < just_variable_vector.length; counter++){
-                 // reset for next loop
-                lastIndex = 0;
-                while(tempString.indexOf(just_variable_vector.at(counter), lastIndex) != -1 ){
-
-                    let declaration = tempString.indexOf(just_variable_vector.at(counter), lastIndex);
-
-                    let next_space = 0;
-                         // Go forwards to get where the first = , ; ) is 
-                        for(let i = declaration; i < tempString.length; i++){
-                            if(tempString.at(i) == "(" ||tempString.at(i) == "{" || tempString.at(i) == ":" || tempString.at(i) == "\r\n" || tempString.at(i) == "\'" || tempString.at(i) == "."){
-                                next_space = i;
-                                break;
-                            }
-
-                            if(tempString.at(i) == ";" || tempString.at(i) == "=" || tempString.at(i) == "," || tempString.at(i) == ")" ){
-                                next_space = i;
-                                console.log(tempString.substr(declaration, i - declaration));
-                               // variable_names.push();
-                                break;
-                            }
-                        }
-                        lastIndex = next_space;
-                }  
-            }
-
-           console.log(variable_names);
-
-            break;
-
         default:
+        // Change the spelling of a instance of a variable 
+        let variable_names = getAllVariableTypes(data_string);
+
+        if (variable_names.length != 0){
+
+        let what_variable_to_scramble = [];
+        let lastIndex = 0;
+
+        let tempString = data_string;
+        let find_var = variable_names.at((Math.floor(Math.random()* variable_names.length)));
+
+        while(tempString.indexOf(find_var, lastIndex) != -1 ){
+            what_variable_to_scramble.push(tempString.indexOf(find_var, lastIndex));
+
+            lastIndex = tempString.indexOf(find_var, lastIndex) + find_var.length;
+        }  
+  
+     for(let counter = 0; counter < find_var.length - 1; counter++){
+     
+         if(find_var.length % counter == 0 && counter > 0){
+            // Steps are seperated for readablility
+            let temp = find_var.substring(0, counter);
+            temp = temp + find_var.at(counter + 1);
+            temp = temp + find_var.at(counter) 
+            temp = temp + find_var.substring(counter + 2, find_var.length);
+            find_var = temp;
+         }
+       }
+       
+   // console.log(find_var);
+
+    let the_exact_one = what_variable_to_scramble.at((Math.floor(Math.random()* what_variable_to_scramble.length)))
+    tempString = data_string.substr(0, the_exact_one);
+    tempString = tempString + find_var + data_string.substr(the_exact_one + find_var.length, data_string.length);
+
+    return_string = tempString;
+
+    if(data_string != return_string){
+        successful = true;
+    } 
+    } 
+
     }
-
-
-
-
 }
-
     return{
          didBug: successful,
         bugstring: return_string
@@ -672,7 +747,7 @@ function bug(data_string, path){
        // else if(bug === BUG_TYPE.SYNTAX){
              successful_bug = syntax_bug(return_string, path);
               return_string = successful_bug.bugstring;
-             // console.log(successful_bug.bugstring);
+              console.log(successful_bug.bugstring);
       //  }
     //successful_bug.didBug
         if(successful_bug.didBug){
@@ -783,22 +858,3 @@ module.exports = {
 	activate,
 	deactivate
 }
-
-
-
-
-
-
- /*
-    
-    */
-
-    // let text_document = vscode.workspace.openTextDocument(vscode.Uri.file(path)).then( doc => {
-    //     console.log(doc.getText());
-    // });
-    // // GOing to attempt to use the api of syntax highlighting to get all the syntax from the file, prefroable 
-    // // as it is already a string...
-
-    // const tokenTypes = ['class', 'interface', 'enum', 'function', 'variable'];
-    // const tokenModifiers = ['declaration', 'documentation'];
-    // const legend = new vscode.SemanticTokensLegend(tokenTypes, tokenModifiers);
