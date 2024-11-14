@@ -251,8 +251,30 @@ function getCodeLength(data_string){
     return codeCounter;
 }
 
+function getAllVariableTypes (data_string){
+    // Find all the variables, gather their names and change the spelling in one use of the program
+    let just_variable_vector = ['double', 'float', 'char',	'short', 'int'];
 
-function getAllVariableTypes(data_string){
+    let lastIndex = 0;
+    let tempString = data_string;
+
+    // Finding all the included .h files ie string, vector or user created classes
+   while(tempString.indexOf(".h", lastIndex) != -1 ){
+
+    let next_space = data_string.indexOf("\r\n", tempString.indexOf(".h", lastIndex))
+         // Go backwards to get the full name of the included class
+        for(let i = tempString.indexOf(".h", lastIndex); i > 0; i--){
+            if(tempString.at(i) == "\""){
+                just_variable_vector.push(tempString.substr(i + 1, ((tempString.indexOf(".h", lastIndex) - 1) - i)));
+                break;
+            }
+        }
+        lastIndex = next_space;
+    }
+
+    return just_variable_vector;
+}
+function getAllVariableNames(data_string){
      // Find all the variables, gather their names and change the spelling in one use of the program
      let just_variable_vector = ['double', 'float', 'char',	'short', 'int'];
 
@@ -339,7 +361,7 @@ let successful = false;
 let return_string = data_string;
 
 //let what_switch = (Math.floor(Math.random()* 13));
-switch(1){
+switch(4){
     case 0:
         // Add an infinite for loop 
          const where_to_inf_for = locationInBraces(data_string);
@@ -348,45 +370,89 @@ switch(1){
           return_string =  return_string + "\n      for(int i = 0; i < 10; i++){\n          i--;\n        }" + data_string.substring(where_to_inf_for, data_string.length);
         break;
     case 1:
-        console.log("here");
-        let var_names = getAllVariableTypes(data_string);
+        let var_names =getAllVariableNames(data_string);
 
         if (var_names.length != 0){
-            console.log("here_1");
             let tempString = data_string;
             let find_var = var_names.at((Math.floor(Math.random()* var_names.length)));
     
-            let what_variable_to_delete = tempString.indexOf(find_var);
-           
+            let what_variable_to_delete = data_string.indexOf(find_var, 0);
+
             let right_end = 0;
             let left_end = 0;
-            // Find where the variable declaration right end
-            for(let counter = what_variable_to_delete; counter < data_string.length; counter ++){
-                if(data_string.at(counter) == "\r\n" || data_string.at(counter) == ";" || data_string.at(counter) == ","){
-                    console.log("here_2");
+
+
+            for(let counter = data_string.indexOf(find_var, 0); counter < data_string.length; counter ++){
+
+                if(data_string.at(counter) == ";" || data_string.at(counter) == "(" || data_string.at(counter) == "\r\n" || data_string.at(counter) == "," || data_string.at(counter) == ")" || data_string.at(counter) == "}" || data_string.at(counter) == "{"){
+                   if(data_string.at(counter) == ";"){
+                    right_end = counter + 1;
+                   }else {
                     right_end = counter;
+                   }
                     break;
                 }
             }
             // Find where the variable declaration left end
-            for(let counter = what_variable_to_delete; counter < data_string.length; counter--){
-                if(data_string.at(counter) == "\r\n" || data_string.at(counter) == ";" || data_string.at(counter) == "("){
-                    console.log("here_3");
-                    left_end = counter;
+            for(let counter = data_string.indexOf(find_var, 0); counter > 0; counter--){
+               // console.log(data_string.at(counter));
+                if(data_string.at(counter) == ";" || data_string.at(counter) == "(" || data_string.at(counter) == "\r\n" || data_string.at(counter) == "," || data_string.at(counter) == ")" || data_string.at(counter) == "}" || data_string.at(counter) == "{"){
+                    left_end = counter + 1;
                     break;
                 }
             }
-            console.log("here_4");
-            console.log(left_end);
-            console.log(right_end);
+            return_string = data_string.substr(0, left_end) + data_string.substr(right_end, data_string.length);
         } 
-
         break;
     case 2:
+        // This will switch the > or < around in any statment NOTE This also will cause a syntax error with << or >> 
+        let signPresent = [];
+            // Finding the location of all the qoutes 
+            for(let counter = 0; counter < data_string.length; counter++){
+                if(data_string.at(counter) == "<" || data_string.at(counter) == ">"){
+                    signPresent.push(counter);
+                }
+            }
+
+            if(signPresent.length != 0){
+                let locationOfsign = (Math.floor(Math.random()* signPresent.length));
+                if(data_string.at(signPresent.at(locationOfsign)) == ">"){
+                    return_string = data_string.substr(0, signPresent.at(locationOfsign) - 1) + "<";
+                }
+                else{
+                    return_string = data_string.substr(0, signPresent.at(locationOfsign) - 1) + ">";
+                }
+
+               return_string = return_string + data_string.substr(signPresent.at(locationOfsign), data_string.length);
+            }
         break;
     case 3:
+        // This will put a variable on the heap that is not deleted causing a memory leak
+        let all_vars = getAllVariableTypes(data_string);
+        console.log(all_vars);
+
+        let what_to_put_on_heap = (Math.floor(Math.random()* all_vars.length));
+        let location = locationInBraces(data_string);
+        return_string = data_string.substr(0, location) + "\r\n   " + all_vars.at(what_to_put_on_heap) + "* num = new " + all_vars.at(what_to_put_on_heap) + "; \r\n" + data_string.substr(location + 1, data_string.length);
         break;
     case 4:
+         // This will remove a * or & operator (This will remove multiplication instances and affect logical and 
+         //                                     but is targeting pointers and references)
+         let starAmpPresent = [];
+         // Finding the location of all the * and &
+         for(let counter = 0; counter < data_string.length; counter++){
+             if(data_string.at(counter) == '*' || data_string.at(counter) == '&'){
+                starAmpPresent.push(counter);
+             }
+         }
+
+         if(starAmpPresent.length != 0){
+             // Grab the string to remove from the string of all the text in the .cpp or .h file
+             let toRemove = (Math.floor(Math.random()* starAmpPresent.length));
+             return_string = data_string.substr(0, starAmpPresent.at(toRemove));
+             return_string = return_string + data_string.substr(starAmpPresent.at(toRemove) + 1, data_string.length);
+         }
+
         break;
     case 5:
         break;
@@ -395,14 +461,6 @@ switch(1){
     case 7:
         break;
     case 8:
-        break;
-    case 9:
-        break;
-    case 10:
-        break;
-    case 11:
-        break;
-    case 12:
         break;
     default:
 
@@ -728,7 +786,7 @@ else{
 
         default:
         // Change the spelling of a instance of a variable 
-        let variable_names = getAllVariableTypes(data_string);
+        let variable_names = getAllVariableNames(data_string);
 
         if (variable_names.length != 0){
 
@@ -813,7 +871,7 @@ function bug(data_string, path){
        // else if(bug === BUG_TYPE.SYNTAX){
             // successful_bug = syntax_bug(return_string, path);
              // return_string = successful_bug.bugstring;
-              console.log(successful_bug.bugstring);
+             console.log(successful_bug.bugstring);
       //  }
     //successful_bug.didBug
         if(successful_bug.didBug){
