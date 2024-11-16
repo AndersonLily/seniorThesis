@@ -49,6 +49,26 @@
         "command": "spider.ReadandBugFiles",
         "title": "Bug",
         "category": "Spider"
+      },
+      {
+        "command": "spider.ReadandBugFilesSyntax",
+        "title": "Only Syntax Bugs",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.ReadandBugFilesFunctional",
+        "title": "Only Functional Bugs",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.ReadandBugFilesPreprocessor",
+        "title": "Only Preprocessor Bugs",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.Reveal_bugs",
+        "title": "Reveal bugs (Only available if you created the Spider Directory in this session)",
+        "category": "Spider"
       }
   ]
   },

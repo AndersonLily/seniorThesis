@@ -46,7 +46,7 @@ const includesInC = ['<algorithm>',	'<iomanip>', '<list>', '<ostream>',
  * @param {vscode.ExtensionContext} context
  */
 
-
+let original_files = [];
 let filesToModify = [];
 let current_directory = null;
 let spiderFileSelectStatusBarItem = null;
@@ -65,9 +65,11 @@ function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand('spider.createDirectory', create_directory_command));
     context.subscriptions.push(vscode.commands.registerCommand('spider.openPreviousDirectory', open_previous_directory_command));
     context.subscriptions.push(vscode.commands.registerCommand('spider.ReadandBugFiles', bug_files_command));
-  //  context.subscriptions.push(vscode.commands.registerCommand('spider.createDirectory', // function :)));
+    context.subscriptions.push(vscode.commands.registerCommand('spider.ReadandBugFilesSyntax', bug_only_syntax_command));
+    context.subscriptions.push(vscode.commands.registerCommand('spider.ReadandBugFilesFunctional', bug_only_functional_command));
+    context.subscriptions.push(vscode.commands.registerCommand('spider.ReadandBugFilesPreprocessor', bug_only_preprocessor_command));
+    context.subscriptions.push(vscode.commands.registerCommand('spider.Reveal_bugs', reveal_added_bugs));
 
-    
    vscode.commands.executeCommand('spider.startup');
 }
 
@@ -102,12 +104,13 @@ function collectFiles_command(){
             // Have a "THROW" for this issue Maybe?
         }else{
             //filtering out anything that isn't a .h .cpp or .c
-            let startOfType = (value.at(0).path).lastIndexOf('.')
-            let fileType = value.at(0).path.slice(startOfType, value.at(0).path.length)
+            let startOfType = (value.at(0).path).lastIndexOf('.');
+            let fileType = value.at(0).path.slice(startOfType, value.at(0).path.length);
 
             if(fileType === ".c" || fileType === ".cpp" || fileType === ".h"){
-            filesToModify.push(value.at(0))
-            get_new_folder_name()
+            filesToModify.push(value.at(0));
+            original_files.push(value.at(0));
+            get_new_folder_name();
             updateSecondStatusBar('Create directory now', 'When you have collected all the files you want to bug select this button to collect them into the same directory', 'spider.createDirectory', true);
             }
         }
@@ -153,7 +156,6 @@ async function create_directory_command() {
                 let individual_Path = dirPath + "\\" + file_name;
             
                 await fs2.copyFile(filesToModify[count_of_files].fsPath, individual_Path);
-                //console.log('source.txt was copied to destination.txt');
                 updateSecondStatusBar('Create directory now', 'When you have collected all the files you want to bug select this button to collect them into the same directory', 'spider.createDirectory', false);
             }catch {
                 console.error('The file could not be copied');
@@ -360,17 +362,17 @@ function functional_bug(data_string, path){
 let successful = false;
 let return_string = data_string;
 
-//let what_switch = (Math.floor(Math.random()* 13));
-switch(4){
+let what_switch = (Math.floor(Math.random()* 8));
+switch(5){
     case 0:
         // Add an infinite for loop 
          const where_to_inf_for = locationInBraces(data_string);
-        // console.log(where_to_inf_for);
+
           return_string = data_string.substring(0, where_to_inf_for);
           return_string =  return_string + "\n      for(int i = 0; i < 10; i++){\n          i--;\n        }" + data_string.substring(where_to_inf_for, data_string.length);
         break;
     case 1:
-        let var_names =getAllVariableNames(data_string);
+        let var_names = getAllVariableNames(data_string);
 
         if (var_names.length != 0){
             let tempString = data_string;
@@ -395,7 +397,6 @@ switch(4){
             }
             // Find where the variable declaration left end
             for(let counter = data_string.indexOf(find_var, 0); counter > 0; counter--){
-               // console.log(data_string.at(counter));
                 if(data_string.at(counter) == ";" || data_string.at(counter) == "(" || data_string.at(counter) == "\r\n" || data_string.at(counter) == "," || data_string.at(counter) == ")" || data_string.at(counter) == "}" || data_string.at(counter) == "{"){
                     left_end = counter + 1;
                     break;
@@ -429,7 +430,6 @@ switch(4){
     case 3:
         // This will put a variable on the heap that is not deleted causing a memory leak
         let all_vars = getAllVariableTypes(data_string);
-        console.log(all_vars);
 
         let what_to_put_on_heap = (Math.floor(Math.random()* all_vars.length));
         let location = locationInBraces(data_string);
@@ -455,24 +455,86 @@ switch(4){
 
         break;
     case 5:
+        // This will delete the left or right side of an equation
+
+        let equal_location = [];
+
+        for(let counter = 0; counter < data_string.length; counter++){
+            if(data_string.at(counter) == '='){
+                equal_location.push(counter);
+            }
+        }
+
+        if(equal_location.length != 0){
+            let which_equal = (Math.floor(Math.random()* equal_location.length));
+
+            //
+            const delete_right = Math.random() < 0.5
+
+            if(delete_right){
+                let right_end;
+                for(let counter = equal_location.at(which_equal); counter < data_string.length; counter++){                
+                      if(data_string.at(counter) == ";" || data_string.at(counter) == "\r\n" ){
+                       if(data_string.at(counter) == ";"){
+                        right_end = counter + 1;
+                       }else {
+                        right_end = counter;
+                       }
+                        break;
+                    }
+                }
+
+                return_string = data_string.substr(0, equal_location.at(which_equal) - 1) + data_string.substr(right_end, data_string.length);
+            }
+            else{
+                let left_end;
+                for(let counter = equal_location.at(which_equal); counter > 0; counter--){
+                    if(data_string.at(counter) == ";" || data_string.at(counter) == "(" || data_string.at(counter) == "\r\n" ||  data_string.at(counter) == ")" || data_string.at(counter) == "}" || data_string.at(counter) == "{"){
+                                    left_end = counter + 1;
+                                    break;
+                     }
+                }
+
+                return_string = data_string.substr(0, left_end) + "\n" + data_string.substr(equal_location.at(which_equal), data_string.length);
+            }
+        }
         break;
     case 6:
+        // This will remove the a for loop declaration and ending brace but leave the internal logic
+        let forPresent = [];
+
+        let tempString = data_string;
+        let lastIndex = 0;
+        let looking_str = "for";
+        // Finding the location of all the preprocessor commands
+        while(tempString.indexOf(looking_str, lastIndex) != -1 ){
+                forPresent.push(tempString.indexOf(looking_str, lastIndex));
+                lastIndex = tempString.indexOf(looking_str, lastIndex) + looking_str.length
+        }
+
+        if(forPresent.length != 0){
+            // Grab the string to remove from the string of all the text in the .cpp or .h file
+            let toRemove = (Math.floor(Math.random()* forPresent.length));
+            let openBrace = data_string.indexOf( "{", forPresent.at(toRemove));
+            let closeBrace = data_string.indexOf("}", openBrace + 1);
+            return_string = data_string.substr(0, forPresent.at(toRemove)) + data_string.substr(openBrace + 1, closeBrace - openBrace - 1)  +  data_string.substr(closeBrace + 1 , data_string.length);
+        }
+       
         break;
     case 7:
-        break;
-    case 8:
+        // This will change the order of parameters passed into a function.
+        // TODO: THIS CASE :)
         break;
     default:
-
-
+        // This will create a null pointer and dereference it.
+        let where_to_insert_seg_fault = locationInBraces(data_string);
+        return_string = data_string.substring(0, where_to_inf_for);
+        return_string =  return_string + "\n      int* p_int = NULL;\n      int oh_no = *p_int;\n" + data_string.substring(where_to_inf_for, data_string.length);
 }
-
 
 if(data_string != return_string){
     successful = true;
 } 
-
-
 
 return{
     didBug: successful,
@@ -814,7 +876,6 @@ else{
          }
        }
        
-   // console.log(find_var);
 
     let the_exact_one = what_variable_to_scramble.at((Math.floor(Math.random()* what_variable_to_scramble.length)))
     tempString = data_string.substr(0, the_exact_one);
@@ -837,43 +898,38 @@ else{
 
 
 function bug(data_string, path){
-   // console.log(data_string);
     console.log(path);
 
     let return_string = data_string;
 
-    //  NOTE THIS IS WHAT IS DETREMINING HOW MANY BUGS ARE IN THE CODE IF THE NUBMER NEEDS TO BE ALTERED LOOK HERE first
-    let randomNumberBug = (Math.floor(Math.random()* 10) + 1) ;// Since random is 0 inclusive 
+    let randomNumberBug = (Math.floor(Math.random()* 3) + 1) ;// Since random is 0 inclusive 
     let numOfBugs = (getCodeLength(data_string) % randomNumberBug); 
-
-  //  console.log(numOfBugs);
 
         //Choose what type of bug randomly
         //Choose what subjection of bug to insert
         //Insert the bug into the code by removing or inserting code
         // If the insertion is successful subtract the numOfBugs by 1
     let consecutive_unsuccesful_bugs = 0;
-    // TEMPORARY RESERT OF NUMOF BUGS TO BE 1 always 
+    // TEMPORARY RESET OF NUM OF BUGS TO BE 1 always 
     numOfBugs = 1;
     while(numOfBugs > 0){
     
         let bug = (Math.floor(Math.random()* 10) % BUG_TYPE.MOD);
         let successful_bug;
     
-       // if(bug === BUG_TYPE.FUNCTIONAL){
+        if(bug === BUG_TYPE.FUNCTIONAL){
            successful_bug = functional_bug(return_string, path);
             return_string = successful_bug.bugstring;
-       // }
-       // else if(bug === BUG_TYPE.PREPROCESSOR){
-           // successful_bug = preprocesser_bug(return_string, path);
-           // return_string = successful_bug.bugstring;
-       // } 
-       // else if(bug === BUG_TYPE.SYNTAX){
-            // successful_bug = syntax_bug(return_string, path);
-             // return_string = successful_bug.bugstring;
-             console.log(successful_bug.bugstring);
-      //  }
-    //successful_bug.didBug
+        }
+        else if(bug === BUG_TYPE.PREPROCESSOR){
+            successful_bug = preprocesser_bug(return_string, path);
+            return_string = successful_bug.bugstring;
+        } 
+        else if(bug === BUG_TYPE.SYNTAX){
+             successful_bug = syntax_bug(return_string, path);
+              return_string = successful_bug.bugstring;
+       }
+
         if(successful_bug.didBug){
             numOfBugs--;
         }
@@ -884,34 +940,183 @@ function bug(data_string, path){
             consecutive_unsuccesful_bugs++;
         }
     }
-
-    // ONCE OUT OF THE WHILE LOOP HERE I WOULD WRITE TO THE FILE :) 
-    // OR RETURN THE string and write where the bug funtion was called :)
-  // console.log(return_string);
-
-   console.log(" ");
+    fs.writeFile(path, return_string, (err) => {
+        // In case of a error throw err.
+        if (err) throw err;
+    })
 }
 
+//function
+
+function only_syntax(data_string, path){
+    console.log(path);
+
+    let return_string = data_string;
+    let randomNumberBug = (Math.floor(Math.random()* 3) + 1) ;// Since random is 0 inclusive 
+    let numOfBugs = (getCodeLength(data_string) % randomNumberBug); 
+
+    //Choose what type of bug randomly
+    //Choose what subjection of bug to insert
+    //Insert the bug into the code by removing or inserting code
+    // If the insertion is successful subtract the numOfBugs by 1
+    let consecutive_unsuccesful_bugs = 0;
+    // TEMPORARY RESET OF NUM OF BUGS TO BE 1 always 
+    numOfBugs = 1;
+    while(numOfBugs > 0){
+    
+        let successful_bug;
+
+        successful_bug = syntax_bug(return_string, path);
+        return_string = successful_bug.bugstring;
+       
+        if(successful_bug.didBug){
+            numOfBugs--;
+        }
+        else if(consecutive_unsuccesful_bugs == 2){
+            break;
+        }
+        else{
+            consecutive_unsuccesful_bugs++;
+        }
+    }
+    fs.writeFile(path, return_string, (err) => {
+        // In case of a error throw err.
+        if (err) throw err;
+    })
+}
+
+function only_functional(data_string, path){
+    console.log(path);
+
+    let return_string = data_string;
+    let randomNumberBug = (Math.floor(Math.random()* 3) + 1) ;// Since random is 0 inclusive 
+    let numOfBugs = (getCodeLength(data_string) % randomNumberBug); 
+
+    //Choose what type of bug randomly
+    //Choose what subjection of bug to insert
+    //Insert the bug into the code by removing or inserting code
+    // If the insertion is successful subtract the numOfBugs by 1
+    let consecutive_unsuccesful_bugs = 0;
+    // TEMPORARY RESET OF NUM OF BUGS TO BE 1 always 
+    numOfBugs = 1;
+    while(numOfBugs > 0){
+    
+        let successful_bug;
+
+        successful_bug = functional_bug(return_string, path);
+        return_string = successful_bug.bugstring;
+       
+        if(successful_bug.didBug){
+            numOfBugs--;
+        }
+        else if(consecutive_unsuccesful_bugs == 2){
+            break;
+        }
+        else{
+            consecutive_unsuccesful_bugs++;
+        }
+    }
+    fs.writeFile(path, return_string, (err) => {
+        // In case of a error throw err.
+        if (err) throw err;
+    })
+}
+
+function only_preprocessor(data_string, path){
+    console.log(path);
+
+    let return_string = data_string;
+    let randomNumberBug = (Math.floor(Math.random()* 3) + 1) ;// Since random is 0 inclusive 
+    let numOfBugs = (getCodeLength(data_string) % randomNumberBug); 
+
+    //Choose what type of bug randomly
+    //Choose what subjection of bug to insert
+    //Insert the bug into the code by removing or inserting code
+    // If the insertion is successful subtract the numOfBugs by 1
+    let consecutive_unsuccesful_bugs = 0;
+    // TEMPORARY RESET OF NUM OF BUGS TO BE 1 always 
+    numOfBugs = 1;
+    while(numOfBugs > 0){
+    
+        let successful_bug;
+
+        successful_bug = preprocesser_bug(return_string, path);
+        return_string = successful_bug.bugstring;
+       
+        if(successful_bug.didBug){
+            numOfBugs--;
+        }
+        else if(consecutive_unsuccesful_bugs == 2){
+            break;
+        }
+        else{
+            consecutive_unsuccesful_bugs++;
+        }
+    }
+    fs.writeFile(path, return_string, (err) => {
+        // In case of a error throw err.
+        if (err) throw err;
+    })
+}
 
 function bug_files_command(){
-
     get_files_from_spider_directory(current_directory);
-
 // Learned this here https://youtu.be/yQBw8skBdZU?si=bh5_ADuWAWO99xOI
     for(let i = 0; i < filesToModify.length ; i++){
-        console.log("tring to read a file");
         fs.readFile(filesToModify.at(i), (err,data)=>{
           //  if(err) throw err;
-                bug(data.toString(), filesToModify.at(i))
+            bug(data.toString(), filesToModify.at(i))
         })
     }  
-    
-    // for(let count_of_files = 0; count_of_files < filesToModify.length; count_of_files++){
-    //     console.log("The file to modify is " + filesToModify.at(i));
-    // }
-
 }
 
+function bug_only_syntax_command(){
+    get_files_from_spider_directory(current_directory);
+
+    for(let i = 0; i < filesToModify.length ; i++){
+        fs.readFile(filesToModify.at(i), (err,data)=>{
+          //  if(err) throw err;
+            only_syntax(data.toString(), filesToModify.at(i))
+        })
+    }  
+}
+
+function bug_only_functional_command(){
+    get_files_from_spider_directory(current_directory);
+
+    for(let i = 0; i < filesToModify.length ; i++){
+        fs.readFile(filesToModify.at(i), (err,data)=>{
+          //  if(err) throw err;
+            only_functional(data.toString(), filesToModify.at(i))
+        })
+    }  
+}
+
+function bug_only_preprocessor_command(){
+    get_files_from_spider_directory(current_directory);
+
+    for(let i = 0; i < filesToModify.length ; i++){
+        fs.readFile(filesToModify.at(i), (err,data)=>{
+          //  if(err) throw err;
+            only_preprocessor(data.toString(), filesToModify.at(i))
+        })
+    }  
+}
+
+function reveal_added_bugs(){
+    console.log(" ");
+    for(let counter = 0; counter < filesToModify.length; counter++){
+        let one = filesToModify.at(counter).lastIndexOf("/");
+        let file_string = filesToModify.at(counter).substr(one, filesToModify.at(counter).length);
+
+        let two = original_files.at(counter).path.lastIndexOf("/");
+        let orig_string = original_files.at(counter).path.substr(two, original_files.at(counter).path.length);
+
+        if(file_string == orig_string){
+            console.log("here");  
+        }
+    }
+}
 
 // This is also being used a the test function for writing code that is ued for debugging but I ma not sure if it 
 // Will esixt in the final product.
@@ -928,13 +1133,7 @@ function hello_world_command(){
          // vscode.window.showQuickPick("Create new directory", "Open existing directory", "More information about Spider");
 }
 
-/*
-What I think I might do is create a copy of of all the files that are collected and put a copy of them
-all into the smae folder that this extention runs and will delete if asked, that way the original files are never changed
-but all their code is accessable to have, and then there could be a command called copy the bugged file over that copies it to 
-the users file only if htey want to. This means that all of hte files can be put in the same file and displayed in the file tree 
-at the same time which would be ideal.
-*/
+
 function updateSpiderStatusBar(text, tooltip, command) {
     //if the status bar has not been created yet
     if(spiderFileSelectStatusBarItem === null) {
