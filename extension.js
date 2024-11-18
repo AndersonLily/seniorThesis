@@ -525,7 +525,12 @@ switch(5){
         // This will change the order of parameters passed into a function.
         // TODO: THIS CASE :)
         break;
-    default:
+        
+    case 8:
+        // This will add a little bug emoji.
+        // TODO: THIS CASE :)
+        break;  
+        default:
         // This will create a null pointer and dereference it.
         let where_to_insert_seg_fault = locationInBraces(data_string);
         return_string = data_string.substring(0, where_to_inf_for);
@@ -911,7 +916,7 @@ function bug(data_string, path){
         // If the insertion is successful subtract the numOfBugs by 1
     let consecutive_unsuccesful_bugs = 0;
     // TEMPORARY RESET OF NUM OF BUGS TO BE 1 always 
-    numOfBugs = 1;
+    numOfBugs = 2;
     while(numOfBugs > 0){
     
         let bug = (Math.floor(Math.random()* 10) % BUG_TYPE.MOD);
@@ -1103,8 +1108,97 @@ function bug_only_preprocessor_command(){
     }  
 }
 
+
+
+function compare_the_files(data_of_original, data_of_bugged){
+    let return_string = data_of_bugged;
+    let offset_for_return_string = 0;
+    let offset_for_the_orignal_string = 0;
+    let bug_message = "\n/************BUG was added here************/\n";
+
+    if(data_of_original === data_of_bugged){
+        return_string = "/************NO BUGS WERE ADDED************/" + return_string;
+    }
+    else if(data_of_original.length <= data_of_bugged.length){
+
+        console.log("Got here :)")
+        for(let counter = 0; counter < (data_of_original.length + offset_for_the_orignal_string); counter++){
+            if(data_of_original.at(counter + offset_for_the_orignal_string) != data_of_bugged.at(counter)){
+                return_string = return_string.substr(0, (counter + offset_for_return_string)-1) + bug_message + return_string.substr((counter + offset_for_return_string), return_string.length);
+                offset_for_return_string = offset_for_return_string + bug_message.length;
+
+                let forward = false;
+
+                let old_counter = counter;
+
+                //Forward loop
+                while(data_of_original.at(old_counter) != data_of_bugged.at(counter) && counter < data_of_bugged.length){
+                    counter++;
+                    console.log(counter);
+                    if(data_of_original.at(old_counter) == data_of_bugged.at(counter)){
+                        forward = true;
+                        offset_for_the_orignal_string = offset_for_the_orignal_string + old_counter - counter;
+                        break;
+                    }
+                }
+
+                if(!forward){
+                     counter = old_counter;
+                    while(data_of_original.at(counter) != data_of_bugged.at(old_counter) && counter < data_of_original.length){
+                        counter++;
+                        console.log(counter);
+                        if(data_of_original.at(counter) == data_of_bugged.at(old_counter)){
+                            offset_for_the_orignal_string = offset_for_the_orignal_string + counter - old_counter;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }else{
+        console.log("In the shorter than one");
+
+        for(let counter = 0; counter < (data_of_bugged.length  + offset_for_the_orignal_string); counter++){
+            if(data_of_original.at(counter) != data_of_bugged.at(counter  + offset_for_the_orignal_string)){
+                return_string = return_string.substr(0, (counter + offset_for_return_string)-1) + bug_message + return_string.substr((counter + offset_for_return_string), return_string.length);
+                offset_for_return_string = offset_for_return_string + bug_message.length;
+
+                let forward = false;
+
+                let old_counter = counter;
+
+                //Forward loop
+                while(data_of_original.at(old_counter) != data_of_bugged.at(counter) && counter < data_of_bugged.length){
+                    counter++;
+                    console.log(counter);
+                    if(data_of_original.at(old_counter) == data_of_bugged.at(counter)){
+                        forward = true;
+                        offset_for_the_orignal_string = offset_for_the_orignal_string + old_counter - counter;
+                        break;
+                    }
+                }
+
+                if(!forward){
+                     counter = old_counter;
+                    while(data_of_original.at(counter) != data_of_bugged.at(old_counter) && counter < data_of_original.length){
+                        counter++;
+                        console.log(counter);
+                        if(data_of_original.at(counter) == data_of_bugged.at(old_counter)){
+                            offset_for_the_orignal_string = offset_for_the_orignal_string + counter - old_counter;
+                            break;
+                        }
+                    }
+                }
+            }
+    }
+}
+
+   return return_string;
+}
+
 function reveal_added_bugs(){
-    console.log(" ");
+
+    if(false){
     for(let counter = 0; counter < filesToModify.length; counter++){
         let one = filesToModify.at(counter).lastIndexOf("/");
         let file_string = filesToModify.at(counter).substr(one, filesToModify.at(counter).length);
@@ -1112,9 +1206,42 @@ function reveal_added_bugs(){
         let two = original_files.at(counter).path.lastIndexOf("/");
         let orig_string = original_files.at(counter).path.substr(two, original_files.at(counter).path.length);
 
+
+        // Heres what will happen
+        // where a change has been made enter ******BUG WAS ADDED HERE*******
+        // write that to that changed file. 
         if(file_string == orig_string){
-            console.log("here");  
+
+            let search = "C:\\";
+            orig_string =  original_files.at(counter).path.substr(original_files.at(counter).path.indexOf(search) + search.length +1, original_files.at(counter).path.length);
+
+            let data_of_original = null;
+            let data_of_bugged = null;
+                try {
+                    data_of_original = fs.readFileSync(orig_string, 'utf8'); 
+                } catch (err) {
+                    console.error(err);
+                }
+ 
+                try {
+                    data_of_bugged = fs.readFileSync(filesToModify.at(counter), 'utf8');
+                } catch (err) {
+                    console.error(err);
+                }
+
+
+            // write the string to the bugged file
+            let newFileContents = compare_the_files(data_of_original, data_of_bugged);
+            console.log(newFileContents);
+
+
+            }else{
+                console.error("Some issue occured with comparing a file");
+            }
         }
+    }else{
+        let newFileContents = compare_the_files("Test Original string things have not been altered here", "Test Changed Original here string things have not been altered here");
+            console.log(newFileContents);
     }
 }
 
