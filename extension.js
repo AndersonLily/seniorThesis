@@ -1115,26 +1115,19 @@ function compare_the_files(data_of_original, data_of_bugged){
     let offset_for_return_string = 0;
     let offset_for_the_orignal_string = 0;
     let offset_for_the_bugged_string = 0;
-    let bug_message = "\n/************BUG was added here************/\n";
+    let bug_message = "\n/************BUG was added around here************/\n";
 
     if(data_of_original === data_of_bugged){
         return_string = "/************NO BUGS WERE ADDED************/" + return_string;
     }
-    else if(data_of_original.length <= data_of_bugged.length){
-
+    else{
         for(let counter = 0; counter < data_of_original.length; counter++){
-          // console.log(counter);
             if((counter + offset_for_the_orignal_string >= data_of_original.length) || (counter + offset_for_the_bugged_string >= data_of_bugged.length)){
                 break;
             }
 
             if(data_of_original.at(counter + offset_for_the_orignal_string) != data_of_bugged.at(counter  + offset_for_the_bugged_string)){
-                // console.log(counter);
-                // console.log(data_of_original.at(counter + offset_for_the_orignal_string));
-                // console.log(data_of_bugged.at(counter));
                 return_string = return_string.substr(0, (counter + offset_for_the_bugged_string + offset_for_return_string) -1) + bug_message + data_of_bugged.substr((counter + offset_for_the_bugged_string), data_of_bugged.length);
-                // console.log(return_string);
-                // console.log(" ");
                 offset_for_return_string = offset_for_return_string + bug_message.length;
 
                 let aligned = false;
@@ -1142,7 +1135,7 @@ function compare_the_files(data_of_original, data_of_bugged){
                 let old_counter = counter;
 
                 //Offset for the bugged string
-                while(data_of_original.at(old_counter + offset_for_the_orignal_string) != data_of_bugged.at(counter + offset_for_the_bugged_string) && (counter + offset_for_the_bugged_string) < data_of_bugged.length){
+                while((counter + offset_for_the_bugged_string) < data_of_bugged.length && (data_of_original.at(old_counter + offset_for_the_orignal_string) != data_of_bugged.at(counter + offset_for_the_bugged_string) || data_of_original.at(old_counter + offset_for_the_orignal_string + 1) != data_of_bugged.at(counter + offset_for_the_bugged_string + 1) )){
                     counter++;
                     if(data_of_original.at(old_counter + offset_for_the_orignal_string) == data_of_bugged.at(counter + offset_for_the_bugged_string) && data_of_original.at(old_counter  + offset_for_the_orignal_string+ 1) == data_of_bugged.at(counter + offset_for_the_bugged_string + 1)){
                         aligned = true;
@@ -1153,18 +1146,13 @@ function compare_the_files(data_of_original, data_of_bugged){
                 }
 
                 if(!aligned){
-                    // console.log("The bugged offset?");
-                    // console.log(offset_for_the_bugged_string);
-                    // console.log("The other offset?");
-                    // console.log(offset_for_the_orignal_string);
                 counter = old_counter;
                 //Offset for the original string
-                while(data_of_original.at(counter) != data_of_bugged.at(old_counter + offset_for_the_bugged_string) && (counter) < data_of_original.length){
+                while((counter) < data_of_original.length - 1 && (data_of_original.at(counter + offset_for_the_orignal_string) != data_of_bugged.at(old_counter + offset_for_the_bugged_string) ||  data_of_original.at(counter  + offset_for_the_orignal_string+ 1) != data_of_bugged.at(old_counter + offset_for_the_bugged_string + 1))){
                     counter++;
-                    if(data_of_original.at(counter) == data_of_bugged.at(old_counter + offset_for_the_bugged_string)){
+                    if(data_of_original.at(counter + offset_for_the_orignal_string) == data_of_bugged.at(old_counter + offset_for_the_bugged_string) && data_of_original.at(counter  + offset_for_the_orignal_string+ 1) == data_of_bugged.at(old_counter + offset_for_the_bugged_string + 1)){
                        // one for the current character that mismatches
                         offset_for_the_orignal_string = offset_for_the_orignal_string + (counter - old_counter);
-                       // console.log(offset_for_the_orignal_string);
                         counter = old_counter;
                         break;
                     }
@@ -1172,59 +1160,26 @@ function compare_the_files(data_of_original, data_of_bugged){
             }
          }
         }
-
+ 
+        if(data_of_original.length <= data_of_bugged.length){
         if(offset_for_the_bugged_string == 0 || (data_of_bugged.length - (data_of_original.length - offset_for_the_orignal_string)) != offset_for_the_bugged_string){
-            return_string = return_string.substr(0, (data_of_original.length + offset_for_return_string + offset_for_the_bugged_string)) + bug_message + data_of_bugged.substr((data_of_original.length - offset_for_the_orignal_string + offset_for_the_bugged_string + 1), data_of_bugged.length);
+            return_string = return_string.substr(0, (data_of_original.length  - offset_for_the_orignal_string + offset_for_return_string + offset_for_the_bugged_string)) + bug_message + data_of_bugged.substr((data_of_original.length - offset_for_the_orignal_string + offset_for_the_bugged_string + 1), data_of_bugged.length);
         }
+    } else{
 
-        console.log(offset_for_return_string);
-        console.log(offset_for_the_orignal_string);
-        console.log(offset_for_the_bugged_string);
-
-    }else{
-        // console.log("In the shorter than one");
-
-        // for(let counter = 0; counter < (data_of_bugged.length  + offset_for_the_orignal_string); counter++){
-        //     if(data_of_original.at(counter) != data_of_bugged.at(counter  + offset_for_the_orignal_string)){
-        //         return_string = return_string.substr(0, (counter + offset_for_return_string)-1) + bug_message + return_string.substr((counter + offset_for_return_string), return_string.length);
-        //         offset_for_return_string = offset_for_return_string + bug_message.length;
-
-        //         let forward = false;
-
-        //         let old_counter = counter;
-
-        //         //Forward loop
-        //         while(data_of_original.at(old_counter) != data_of_bugged.at(counter) && counter < data_of_bugged.length){
-        //             counter++;
-        //             console.log(counter);
-        //             if(data_of_original.at(old_counter) == data_of_bugged.at(counter)){
-        //                 forward = true;
-        //                 offset_for_the_orignal_string = offset_for_the_orignal_string + old_counter - counter;
-        //                 break;
-        //             }
-        //         }
-
-        //         if(!forward){
-        //              counter = old_counter;
-        //             while(data_of_original.at(counter) != data_of_bugged.at(old_counter) && counter < data_of_original.length){
-        //                 counter++;
-        //                 console.log(counter);
-        //                 if(data_of_original.at(counter) == data_of_bugged.at(old_counter)){
-        //                     offset_for_the_orignal_string = offset_for_the_orignal_string + counter - old_counter;
-        //                     break;
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+        if(offset_for_the_orignal_string == 0 || (data_of_original.length - (data_of_bugged.length + offset_for_the_bugged_string)) != offset_for_the_orignal_string){
+            return_string = return_string.substr(0, (data_of_original.length  - offset_for_the_orignal_string + offset_for_return_string + offset_for_the_bugged_string)) + bug_message + data_of_bugged.substr((data_of_original.length - offset_for_the_orignal_string + offset_for_the_bugged_string + 1), data_of_bugged.length);
+        }
     }
 
+    }
+    
    return return_string;
 }
 
 function reveal_added_bugs(){
 
-    if(false){
+    if(true){
     for(let counter = 0; counter < filesToModify.length; counter++){
         let one = filesToModify.at(counter).lastIndexOf("/");
         let file_string = filesToModify.at(counter).substr(one, filesToModify.at(counter).length);
@@ -1280,6 +1235,22 @@ function reveal_added_bugs(){
 
         let test5 = compare_the_files("Test Original string things have not been altered here", "Test Changed Original here string things AND HERE have been altered here this");
             console.log(test5);
+
+
+        let test6 = compare_the_files("Test Original string things have not been altered here", "Test Original things have not been altered here");
+         console.log(test6);
+
+        let test7 = compare_the_files("Test Original string things have not been altered here", "Test Original string have not been altered here");
+        console.log(test7);
+
+        let test8 = compare_the_files("Test Original string things have not been altered here", "Test Original string have been altered here");
+        console.log(test8);
+
+        let test9 = compare_the_files("Test Original string things have not been altered here", "Test Original string things have not been altered");
+        console.log(test9);
+
+        let test10 = compare_the_files("Test Original string things have not been altered here", "Test Original string things have not nyx been altered");
+        console.log(test10);
     }
 }
 
