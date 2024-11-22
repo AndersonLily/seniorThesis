@@ -1,0 +1,83 @@
+{
+  "name": "spider",
+  "displayName": "Spider",
+  "description": "a way for new programmers to learn how to find bugs",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.93.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "spider.helloWorld",
+        "title": "Hello World",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.startup",
+        "title": "Start up Spider",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.collectFiles",
+        "title": "Collect Files",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.createDirectory",
+        "title": "Create New Directory",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.openPreviousDirectory",
+        "title": "Open Existing Directory",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.ReadandBugFiles",
+        "title": "Bug",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.ReadandBugFilesSyntax",
+        "title": "Only Syntax Bugs",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.ReadandBugFilesFunctional",
+        "title": "Only Functional Bugs",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.ReadandBugFilesPreprocessor",
+        "title": "Only Preprocessor Bugs",
+        "category": "Spider"
+      },
+      {
+        "command": "spider.Reveal_bugs",
+        "title": "Reveal bugs (Only available if you created the Spider Directory in this session)",
+        "category": "Spider"
+      }
+  ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.93.0",
+    "@types/mocha": "^10.0.7",
+    "@types/node": "20.x",
+    "eslint": "^9.9.1",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1"
+  }
+}
