@@ -41,11 +41,6 @@
         "category": "Spider"
       },
       {
-        "command": "spider.deleteDirectory",
-        "title": "Delete Directory",
-        "category": "Spider"
-      },
-      {
         "command": "spider.ReadandBugFiles",
         "title": "Bug",
         "category": "Spider"

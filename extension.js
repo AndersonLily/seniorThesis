@@ -51,7 +51,7 @@ let filesToModify = [];
 let current_directory = null;
 let spiderFileSelectStatusBarItem = null;
 let secondFileStatusBarItem = null;
-
+let createdDirectory = false;
 /* Since in the package.json has the activationEvents that contains
  * "onStartUpFinished" this function will run then, that is why all of the
  * commands included are registered here as well as calling the startup_command.
@@ -61,7 +61,7 @@ function activate(context) {
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
     context.subscriptions.push(vscode.commands.registerCommand('spider.startup', startup_command));
     context.subscriptions.push(vscode.commands.registerCommand('spider.collectFiles', collectFiles_command));
-	context.subscriptions.push(vscode.commands.registerCommand('spider.helloWorld', hello_world_command));
+
     context.subscriptions.push(vscode.commands.registerCommand('spider.createDirectory', create_directory_command));
     context.subscriptions.push(vscode.commands.registerCommand('spider.openPreviousDirectory', open_previous_directory_command));
     context.subscriptions.push(vscode.commands.registerCommand('spider.ReadandBugFiles', bug_files_command));
@@ -81,7 +81,6 @@ function startup_command(){
 
     vscode.window.showInformationMessage('What do you want to do today?', new_directory, old_directory).then(selection => {
         if (selection === new_directory) {
-            // TO DO: add icon to this from the vscode style guidelines either this is a bug to "bug" for a file to show the collection needs to happen
                     updateSpiderStatusBar('Spider - Add files', 'Select files that you want to search for bugs in', 'spider.collectFiles');
             }
         else if (selection === old_directory){
@@ -127,8 +126,9 @@ const today = new Date();
 const yyyy = today.getFullYear();
 const mm = today.getMonth() + 1; 
 const  dd = today.getDate();
+const dm = today.getMinutes();
 
-const formattedToday = dd + '-' + mm + '-' + yyyy;  //'-'
+const formattedToday = dd + '-' + mm + '-' + yyyy + '-' + dm;  //'-'
 
 // TODO: the fs.path needs to be altered to not have double slashes :)
 current_directory = vscode.workspace.workspaceFolders[0].uri.fsPath + "/" + "Spider-" + formattedToday;
@@ -157,6 +157,8 @@ async function create_directory_command() {
             
                 await fs2.copyFile(filesToModify[count_of_files].fsPath, individual_Path);
                 updateSecondStatusBar('Create directory now', 'When you have collected all the files you want to bug select this button to collect them into the same directory', 'spider.createDirectory', false);
+                updateSpiderStatusBar('Bug files', 'When you are ready this will add bugs to to the files you have selected.', 'spider.ReadandBugFiles');
+                createdDirectory = true;
             }catch {
                 console.error('The file could not be copied');
             }
@@ -362,8 +364,8 @@ function functional_bug(data_string, path){
 let successful = false;
 let return_string = data_string;
 
-let what_switch = (Math.floor(Math.random()* 8));
-switch(5){
+let what_switch = (Math.floor(Math.random()* 10));
+switch(what_switch){
     case 0:
         // Add an infinite for loop 
          const where_to_inf_for = locationInBraces(data_string);
@@ -530,7 +532,7 @@ switch(5){
         // This will add a little bug emoji.
         // TODO: THIS CASE :)
         break;  
-        default:
+    default:
         // This will create a null pointer and dereference it.
         let where_to_insert_seg_fault = locationInBraces(data_string);
         return_string = data_string.substring(0, where_to_inf_for);
@@ -551,7 +553,7 @@ function preprocesser_bug(data_string, path){
 let successful = false;
 let return_string = data_string;
 
-const doRemove = ((Math.floor(Math.random()* 2))%2 == 0);
+const doRemove = ((Math.floor(Math.random()* 3))%2 == 0);
 if (doRemove){
 // Removing a preprocessor command
     let definesPresent = [];
@@ -579,8 +581,8 @@ if (doRemove){
 }else 
 {
     return_string = data_string;
-    // This will be randomized 8 is chosen because there are 8 cases (seven and 1 default).
-    const whichCase = (Math.floor(Math.random()* 8));
+    // This will be randomized 9 is chosen because there are 8 cases (seven and 1 default).
+    const whichCase = (Math.floor(Math.random()* 9));
     switch(whichCase) {
         case 0:
             //Insert a random C++ standard libary include
@@ -667,11 +669,11 @@ function syntax_bug(data_string, path){
     let return_string = data_string;
 
 
-    const doRemove = ((Math.floor(Math.random()* 2))%2 == 0);
+    const doRemove = ((Math.floor(Math.random()* 3))%2 == 0);
     if (doRemove){
         // This will remove something in the code that causes a syntax error
 
-        const what_switch = (Math.floor(Math.random()* 3));
+        const what_switch = (Math.floor(Math.random()* 5));
 
      switch(what_switch) {
         case 0:
@@ -907,16 +909,14 @@ function bug(data_string, path){
 
     let return_string = data_string;
 
-    let randomNumberBug = (Math.floor(Math.random()* 3) + 1) ;// Since random is 0 inclusive 
-    let numOfBugs = (getCodeLength(data_string) % randomNumberBug); 
+    let randomNumberBug = (Math.floor(Math.random()* 5) + 1) ;// Since random is 0 inclusive 
+    let numOfBugs = (getCodeLength(data_string) % randomNumberBug) + 1; 
 
         //Choose what type of bug randomly
         //Choose what subjection of bug to insert
         //Insert the bug into the code by removing or inserting code
         // If the insertion is successful subtract the numOfBugs by 1
     let consecutive_unsuccesful_bugs = 0;
-    // TEMPORARY RESET OF NUM OF BUGS TO BE 1 always 
-    numOfBugs = 2;
     while(numOfBugs > 0){
     
         let bug = (Math.floor(Math.random()* 10) % BUG_TYPE.MOD);
@@ -957,16 +957,14 @@ function only_syntax(data_string, path){
     console.log(path);
 
     let return_string = data_string;
-    let randomNumberBug = (Math.floor(Math.random()* 3) + 1) ;// Since random is 0 inclusive 
-    let numOfBugs = (getCodeLength(data_string) % randomNumberBug); 
+    let randomNumberBug = (Math.floor(Math.random()* 5) + 1) ;// Since random is 0 inclusive 
+    let numOfBugs = (getCodeLength(data_string) % randomNumberBug) + 1; 
 
     //Choose what type of bug randomly
     //Choose what subjection of bug to insert
     //Insert the bug into the code by removing or inserting code
     // If the insertion is successful subtract the numOfBugs by 1
     let consecutive_unsuccesful_bugs = 0;
-    // TEMPORARY RESET OF NUM OF BUGS TO BE 1 always 
-    numOfBugs = 1;
     while(numOfBugs > 0){
     
         let successful_bug;
@@ -994,16 +992,13 @@ function only_functional(data_string, path){
     console.log(path);
 
     let return_string = data_string;
-    let randomNumberBug = (Math.floor(Math.random()* 3) + 1) ;// Since random is 0 inclusive 
-    let numOfBugs = (getCodeLength(data_string) % randomNumberBug); 
-
+    let randomNumberBug = (Math.floor(Math.random()* 5) + 1) ;// Since random is 0 inclusive 
+    let numOfBugs = (getCodeLength(data_string) % randomNumberBug) + 1;
     //Choose what type of bug randomly
     //Choose what subjection of bug to insert
     //Insert the bug into the code by removing or inserting code
     // If the insertion is successful subtract the numOfBugs by 1
     let consecutive_unsuccesful_bugs = 0;
-    // TEMPORARY RESET OF NUM OF BUGS TO BE 1 always 
-    numOfBugs = 1;
     while(numOfBugs > 0){
     
         let successful_bug;
@@ -1031,16 +1026,14 @@ function only_preprocessor(data_string, path){
     console.log(path);
 
     let return_string = data_string;
-    let randomNumberBug = (Math.floor(Math.random()* 3) + 1) ;// Since random is 0 inclusive 
-    let numOfBugs = (getCodeLength(data_string) % randomNumberBug); 
-
+    let randomNumberBug = (Math.floor(Math.random()* 5) + 1) ;// Since random is 0 inclusive 
+    let numOfBugs = (getCodeLength(data_string) % randomNumberBug) + 1;
+    
     //Choose what type of bug randomly
     //Choose what subjection of bug to insert
     //Insert the bug into the code by removing or inserting code
     // If the insertion is successful subtract the numOfBugs by 1
     let consecutive_unsuccesful_bugs = 0;
-    // TEMPORARY RESET OF NUM OF BUGS TO BE 1 always 
-    numOfBugs = 1;
     while(numOfBugs > 0){
     
         let successful_bug;
@@ -1073,6 +1066,7 @@ function bug_files_command(){
             bug(data.toString(), filesToModify.at(i))
         })
     }  
+
 }
 
 function bug_only_syntax_command(){
@@ -1084,6 +1078,7 @@ function bug_only_syntax_command(){
             only_syntax(data.toString(), filesToModify.at(i))
         })
     }  
+
 }
 
 function bug_only_functional_command(){
@@ -1094,7 +1089,8 @@ function bug_only_functional_command(){
           //  if(err) throw err;
             only_functional(data.toString(), filesToModify.at(i))
         })
-    }  
+    } 
+    
 }
 
 function bug_only_preprocessor_command(){
@@ -1105,7 +1101,8 @@ function bug_only_preprocessor_command(){
           //  if(err) throw err;
             only_preprocessor(data.toString(), filesToModify.at(i))
         })
-    }  
+    } 
+    
 }
 
 
@@ -1184,13 +1181,17 @@ function reveal_added_bugs(){
         let one = filesToModify.at(counter).lastIndexOf("/");
         let file_string = filesToModify.at(counter).substr(one, filesToModify.at(counter).length);
 
-        let two = original_files.at(counter).path.lastIndexOf("/");
-        let orig_string = original_files.at(counter).path.substr(two, original_files.at(counter).path.length);
+        for( let count2 = 0; count2 < original_files.length; count2++){
+        let two = original_files.at(count2).path.lastIndexOf("/");
+        let orig_string = original_files.at(count2).path.substr(two, original_files.at(count2).path.length);
 
 
         // Heres what will happen
-        // where a change has been made enter ******BUG WAS ADDED HERE*******
-        // write that to that changed file. 
+        // where a change has been made enter ******BUG WAS ADDED around HERE*******
+        // write that to that changed file.
+        
+        console.log(file_string);
+        console.log(orig_string)
         if(file_string == orig_string){
 
             let search = "C:\\";
@@ -1213,12 +1214,13 @@ function reveal_added_bugs(){
 
             // write the string to the bugged file
             let newFileContents = compare_the_files(data_of_original, data_of_bugged);
-            console.log(newFileContents);
+            fs.writeFile(filesToModify.at(counter), newFileContents, (err) => {
+                // In case of a error throw err.
+                if (err) throw err;
+            })
 
-
-            }else{
-                console.error("Some issue occured with comparing a file");
             }
+        }
         }
     }else{
         let test1 = compare_the_files("Test Original string things have not been altered here", "Test Changed Original here string things AND HERE have not been altered here");
@@ -1253,22 +1255,6 @@ function reveal_added_bugs(){
         console.log(test10);
     }
 }
-
-// This is also being used a the test function for writing code that is ued for debugging but I ma not sure if it 
-// Will esixt in the final product.
-function hello_world_command(){
-    // The code you place here will be executed every time your command is executed
-
-         //get_new_folder_name()
-        //  create_folder(current_directory)
-
-      
-          //vscode.window.showInformationMessage('Hello VS code!', true);
-
-          //vscode.window.showInputBox();
-         // vscode.window.showQuickPick("Create new directory", "Open existing directory", "More information about Spider");
-}
-
 
 function updateSpiderStatusBar(text, tooltip, command) {
     //if the status bar has not been created yet
