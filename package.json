@@ -2,10 +2,11 @@
   "name": "spider",
   "displayName": "Spider",
   "description": "a way for new programmers to learn how to find bugs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.93.0"
   },
+  "publisher": "Spider",
   "categories": [
     "Other"
   ],
